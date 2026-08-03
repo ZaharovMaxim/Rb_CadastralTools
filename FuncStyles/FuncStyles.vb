@@ -95,7 +95,7 @@ Public Class FuncStyles
                                             sumbolElementMask.Filename = tempSumb2
                                             Dim findFile As String = tempSumb2.Replace("shx", "shp")
                                             'ищем файл формы во вспомогательных файлах поддержки
-                                            Dim fullNameFileShp As String = FuncFiles.funcFindFileToDirectorySupport(findFile)
+                                            Dim fullNameFileShp As String = FuncFiles.getFileToDirectorySupport(findFile)
                                             If IO.File.Exists(fullNameFileShp) = True Then
                                                 strMess = strMess & vbLf & "Файл формы (имя) " & findFile & ", найден. Полный путь: " & fullNameFileShp
                                                 Dim Numbshp As Integer = -1
@@ -421,7 +421,7 @@ Public Class FuncStyles
     'функция возвращает имя формы по его коду
     Public Shared Function FuncReturnNameSHPByIndex(ByVal indexShape As Integer, ByVal nameFile As String) As String
         FuncReturnNameSHPByIndex = ""
-        Dim putshFileSHP As String = FuncFiles.funcFindFileToDirectorySupport(nameFile)
+        Dim putshFileSHP As String = FuncFiles.getFileToDirectorySupport(nameFile)
         If IO.File.Exists(putshFileSHP) = True Then
             'читаем файл с формой
             Dim sr As StreamReader = New StreamReader(putshFileSHP)
@@ -442,27 +442,5 @@ Public Class FuncStyles
             End While
             sr.Close()
         End If
-    End Function
-
-    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    'функция проверяет наличие определения блока в чертеже
-    Public Shared Function containsBlock(ByVal ActivDocument As Drawing, ByVal nameBlock As String) As DwgBlock
-        Dim result As DwgBlock = Nothing
-        Try
-            If IsNothing(nameBlock) = False And IsNothing(ActivDocument) = False Then
-                If nameBlock.Trim.Length > 0 Then
-                    Dim DwgBlock As DwgBlocks = ActivDocument.Blocks
-                    If DwgBlock.Count > 1 Then
-                        For Each dwgblk As DwgBlock In DwgBlock
-                            If nameBlock.Trim Like dwgblk.Name Then
-                                result = dwgblk
-                            End If
-                        Next
-                    End If
-                End If
-            End If
-        Catch ex As System.Exception
-        End Try
-        Return result
     End Function
 End Class
