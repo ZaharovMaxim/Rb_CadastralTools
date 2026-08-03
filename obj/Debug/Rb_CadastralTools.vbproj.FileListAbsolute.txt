@@ -1,0 +1,33 @@
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.plugin
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.dll.config
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.dll
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.pdb
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.xml
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.vbproj.ResolveComReference.cache
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.EditModelDlg.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormAutoCreateParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateCadastralPlan.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormConvertNetworks.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateLabelParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormDrawStructureLineByNode.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.Resources.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateSlopeLeader.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormDecorPlane.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormEditXMLSymbol.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormHatchUserSite.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormImportParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormInsertPointPPT.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormReportCatalogCoordinates.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormRosreestrKPTImport.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormSelectCheckBox.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormSelectObject.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.PanelProjectCadastral.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.PanelPropertiesObject.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.PanelSymbolTOPO.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.vbproj.GenerateResource.cache
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.vbproj.CoreCompileInputs.cache
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.vbproj.CopyComplete
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.dll
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.xml
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.pdb

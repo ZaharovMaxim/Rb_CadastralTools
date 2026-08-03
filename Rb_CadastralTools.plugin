@@ -1,0 +1,154 @@
+﻿{
+  "assemblies": {
+    "LandCadastralTools": {
+      "assembly": "Rb_CadastralTools.dll, Rb_CadastralTools.RopExample1.RopExample1PluginHost"
+    }
+  },
+  "actions": {
+     "id_EditXMLSymbols": {
+      "cmd": "EditXMLSymbols",
+      "title": "Редактор шаблона"
+    },
+    "id_NumberPolygon": {
+      "cmd": "NumberPolygon",
+      "title": "Нумеровать полигон"
+    },
+    "id_CreateCadastralObject": {
+      "cmd": "CreateCadastralObject",
+      "title": "Создать объект"
+    },
+    "id_CreateOstrovObject": {
+      "cmd": "CreateOstrovObject",
+      "title": "Добавить островок"
+    },
+    "id_CreateCounterObject": {
+      "cmd": "CreateCounterObject",
+      "title": "Добавить контур"
+    },
+    "id_ReportCoordinatesPoints": {
+      "cmd": "ReportCoordinatesPoints",
+      "title": "Каталог координат"
+    },
+    "id_ReplaseParcels": {
+      "cmd": "ReplaseParcels",
+      "title": "Замена контура"
+    },
+    "id_ReNumberPolygon": {
+      "cmd": "ReNumberPolygon",
+      "title": "Перенумеровать полигон"
+    },
+    "id_FindCadastralPoints": {
+      "cmd": "FindCadastralPoints",
+      "title": "Найти точку"
+    },
+    "id_DeleteCadastralPoints": {
+      "cmd": "DeleteCadastralPoints",
+      "title": "Удалить точку"
+    },
+    "id_CreateLabelsParcels": {
+      "cmd": "CreateLabelsParcels",
+      "title": "Создать метки участков"
+    },
+    "id_DeleteLabelsParcels": {
+      "cmd": "DeleteLabelsParcels",
+      "title": "Удалить метки участков"
+    },
+    "id_ReportCadastralParcels": {
+      "cmd": "ReportCadastralParcels",
+      "title": "Ведомость имущественно-правовой инвентаризации"
+    },
+    "id_ReportCadastralZones": {
+      "cmd": "ReportCadastralZones",
+      "title": "Ведомость ЗОУИТ"
+    },
+    "id_ReportPMT": {
+      "cmd": "ReportPMT",
+      "title": "Проект межевания"
+    },
+    "id_ExportParcelsToGeoGSON": {
+      "cmd": "ExportParcelsToGeoGSON",
+      "title": "Объекты в Публичную карту"
+    },
+    "id_ExportCadastralData": {
+      "cmd": "ExportCadastralData",
+      "title": "Экспорт объектов в Автокад"
+    },
+    "id_RosreestrImportKPT": {
+      "cmd": "RosreestrImportKPT",
+      "title": "Импорт xml"
+    },
+    "id_ExportZOUITData": {
+      "cmd": "ExportZOUITData",
+      "title": "Импорт xml"
+    },
+    "id_FiltreKPT": {
+      "cmd": "FiltreKPT",
+      "title": "Сводный план"
+    }    
+  },
+  "menubars": {
+    "rbproj": {
+      "items": [
+        {
+          "id": "MenuUserTools_menu",
+          "title": "Земельный кадастр"
+        }
+      ]
+    },
+    "rbproj.MenuUserTools_menu": {
+      "items": [
+        {
+          "id": "level1",
+          "title": "Проект планировки территории"
+        }
+      ]
+    },
+    "rbproj.MenuUserTools_menu.level1": {
+      "items": [
+        "id_RosreestrImportKPT",
+        "id_FiltreKPT",
+        "-",
+        "id_CreateCadastralObject",
+        "id_CreateCounterObject",
+        "id_CreateOstrovObject",
+        "id_ReplaseParcels",
+        "-",
+        "id_NumberPolygon",
+        "id_ReNumberPolygon",
+        "id_FindCadastralPoints",
+        "id_DeleteCadastralPoints",
+        "-",
+        "id_CreateLabelsParcels",
+        "id_DeleteLabelsParcels",
+        "-",
+        "id_ReportCoordinatesPoints",
+        "id_ReportCadastralParcels",
+        "id_ReportCadastralZones",
+        "id_ReportPMT",
+        "-",
+        "id_ExportCadastralData"
+      ]
+    }
+  },
+
+  "panels": {
+    "PanelSymbolTOPO_uid": {
+      "title": "Оформление плана",
+      "cmd": "CreateSymbolTOPO",
+      "icon": "ic_file",
+      "refresh": "RefreshSymbolTOPO"
+    },
+    "PanelPropertiesObject_uid": {
+      "title": "Пользовательские свойства",
+      "cmd": "CreatePropertiesObject",
+      "icon": "ic_file",
+      "refresh": "RefreshPropertiesObject"
+    },
+    "PanelProjectCadastral_uid": {
+      "title": "Проект планировки территории",
+      "cmd": "CreatePropertiesCadastralData",
+      "icon": "ic_file",
+      "refresh": "RefreshPanelCadastralData"
+    }
+  }
+}

@@ -1,0 +1,157 @@
+C:\захаров\RoburNET_Roads\Topomatic Robur Road 16.0\RoburRoadTools.plugin
+C:\захаров\RoburNET_Roads\Topomatic Robur Road 16.0\test.plugin
+C:\захаров\RoburNET_Roads\Topomatic Robur Road 16.0\RoburNET(x64)2_0.dll
+C:\захаров\RoburNET_Roads\Topomatic Robur Road 16.0\RoburNET(x64)2_0.pdb
+C:\захаров\RoburNET_Roads\Topomatic Robur Road 16.0\RoburNET(x64)2_0.xml
+C:\захаров\Topomatic Robur Survey 16.0\RoburNET(x64)2_0.dll
+C:\захаров\Topomatic Robur Survey 16.0\RoburNET(x64)2_0.pdb
+C:\захаров\Topomatic Robur Survey 16.0\RoburNET(x64)2_0.xml
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.AssemblyReference.cache
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormDrawStructureLineByNode.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.Resources.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateSlopeLeader.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormDecorPlane.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormEditXMLSymbol.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormHatchUserSite.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectObject.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelSymbolTOPO.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.GenerateResource.cache
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.CoreCompileInputs.cache
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.dll
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.xml
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.pdb
+C:\захаров\Topomatic Robur Survey 16.0\InfrastradaRoadTools.plugin
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormRegistration.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelPropertiesObject.resources
+C:\захаров\RoburNET_Roads\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectCheckBox.resources
+E:\Topomatic Robur Survey 16.0\InfrastradaRoadTools.plugin
+E:\Topomatic Robur Survey 16.0\RoburNET(x64)2_0.dll
+E:\Topomatic Robur Survey 16.0\RoburNET(x64)2_0.pdb
+E:\Topomatic Robur Survey 16.0\RoburNET(x64)2_0.xml
+E:\NET\RoburNET(x64)2_0\bin\Debug\InfrastradaRoadTools.plugin
+E:\NET\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.dll
+E:\NET\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.pdb
+E:\NET\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.xml
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.AssemblyReference.cache
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.ResolveComReference.cache
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateMiddleRocs.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormAutoCreateParcels.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateBeam.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateBridge.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateLabelParcels.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateParcels.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormDrawStructureLineByNode.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.Resources.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateSlopeLeader.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormDecorPlane.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormEditXMLSymbol.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormHatchUserSite.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormImportParcels.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormInsertPointPPT.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormMoveBearms.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormNewEmptyBridge.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormProjectBearms.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormRegistration.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormReportBeams.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormReportCatalogCoordinates.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormRosreestrKPTImport.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectBeams.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectCheckBox.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectObject.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormUserTemptate.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelProjectBridge.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelPropertiesObject.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelSymbolTOPO.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.HorizontalGrid.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.VerticalGrid.resources
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.GenerateResource.cache
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.CoreCompileInputs.cache
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.dll
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.xml
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.pdb
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelProjectCadastral.resources
+E:\NET\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.dll.config
+E:\NET\RoburNET(x64)2_0\bin\Debug\NetTopologySuite.dll
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Buffers.dll
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Memory.dll
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Numerics.Vectors.dll
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+E:\NET\RoburNET(x64)2_0\bin\Debug\NetTopologySuite.xml
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Buffers.xml
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Memory.xml
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Numerics.Vectors.xml
+E:\NET\RoburNET(x64)2_0\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+E:\NET\RoburNET(x64)2_0\obj\Debug\RoburNET.25114D8C.Up2Date
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.AssemblyReference.cache
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.ResolveComReference.cache
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.dll
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.xml
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.pdb
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormAutoCreateParcels.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateLabelParcels.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateParcels.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormDrawStructureLineByNode.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.Resources.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateSlopeLeader.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormDecorPlane.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormEditXMLSymbol.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormHatchUserSite.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormImportParcels.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormInsertPointPPT.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormReportCatalogCoordinates.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormRosreestrKPTImport.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectCheckBox.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormSelectObject.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelProjectCadastral.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelPropertiesObject.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.PanelSymbolTOPO.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.GenerateResource.cache
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.CoreCompileInputs.cache
+C:\захаров\RoburNET(x64)2_0\bin\Debug\MenuUserTools.plugin
+C:\захаров\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.dll.config
+C:\захаров\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.dll
+C:\захаров\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.pdb
+C:\захаров\RoburNET(x64)2_0\bin\Debug\RoburNET(x64)2_0.xml
+C:\захаров\RoburNET(x64)2_0\bin\Debug\NetTopologySuite.xml
+C:\захаров\RoburNET(x64)2_0\bin\Debug\System.Buffers.xml
+C:\захаров\RoburNET(x64)2_0\bin\Debug\System.Memory.xml
+C:\захаров\RoburNET(x64)2_0\bin\Debug\System.Numerics.Vectors.xml
+C:\захаров\RoburNET(x64)2_0\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET(x64)2_0.vbproj.CopyComplete
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormCreateCadastralPlan.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.FormConvertNetworks.resources
+C:\захаров\RoburNET(x64)2_0\obj\Debug\RoburNET_x64_2_0.EditModelDlg.resources
+C:\захаров\SurvRobur\obj\Debug\RoburNET(x64)2_0.vbprojAssemblyReference.cache
+C:\захаров\SurvRobur\obj\Debug\RoburNET(x64)2_0.vbproj.ResolveComReference.cache
+C:\захаров\SurvRobur\obj\Debug\RoburNET(x64)2_0.vbproj.GenerateResource.cache
+C:\захаров\SurvRobur\obj\Debug\RoburNET(x64)2_0.vbproj.CoreCompileInputs.cache
+C:\захаров\SurvRobur\obj\Debug\RoburNET(x64)2_0.vbproj.CopyComplete
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.plugin
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.dll.config
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.dll
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.pdb
+D:\NET\Topomatic Robur Road 16.0\Rb_CadastralTools.xml
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.EditModelDlg.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormAutoCreateParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateCadastralPlan.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormConvertNetworks.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateLabelParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormDrawStructureLineByNode.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.Resources.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormCreateSlopeLeader.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormDecorPlane.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormEditXMLSymbol.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormHatchUserSite.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormImportParcels.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormInsertPointPPT.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormReportCatalogCoordinates.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormRosreestrKPTImport.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormSelectCheckBox.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.FormSelectObject.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.PanelProjectCadastral.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.PanelPropertiesObject.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.PanelSymbolTOPO.resources
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.dll
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.xml
+C:\захаров\SurvRobur\obj\Debug\Rb_CadastralTools.pdb

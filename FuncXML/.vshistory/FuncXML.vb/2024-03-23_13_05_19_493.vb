@@ -1,0 +1,986 @@
+﻿Imports System.Environment
+Imports System.IO
+Imports System.Windows.Documents
+Imports System.Xml
+Imports Topomatic.FoundationClasses
+
+Public Class FuncXML
+    Public Shared Function FuncGetPatchTemplates() As String
+        FuncGetPatchTemplates = ""
+        Try
+            Dim TempDir As String = GetFolderPath(SpecialFolder.ApplicationData)
+            If IO.Directory.Exists(TempDir & "\Civil3DToolsUtility\TOPOTemplates") = True Then
+                TempDir = TempDir & "\Civil3DToolsUtility\TOPOTemplates"
+            Else
+                TempDir = ""
+            End If
+            Return TempDir
+        Catch ex As System.Security.SecurityException
+        End Try
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает имена категории с xmp файла
+    Public Shared Function FuncReadCategoryToXML(ByVal putchFileXml As String, ByRef arrayCategory As String()) As Boolean
+        FuncReadCategoryToXML = False
+        Dim countArrayCategory As Integer = 0
+        If IsArray(arrayCategory) = True Then
+            countArrayCategory = arrayCategory.Count
+        End If
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim boolCategory As Boolean = False
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Category" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    Dim value As String = reader.Value
+                                    If IsNothing(value) = False Then
+                                        If nameN.Trim Like "CategoryName" Then
+                                            ReDim Preserve arrayCategory(countArrayCategory)
+                                            arrayCategory(countArrayCategory) = reader.Value
+                                            countArrayCategory += 1
+                                        End If
+                                    End If
+                                End While
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LibrarySymbols" Then
+                            reader.Close()
+                            Return True
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает имена таблиц с определенной категории
+    Public Shared Function FuncReadTablesXMLByCategory(ByVal putchFileXml As String, ByVal nameCategory As String, ByRef arrayTables As String()) As Boolean
+        FuncReadTablesXMLByCategory = False
+        Dim countarrayTables As Integer = 0
+        If IsArray(arrayTables) = True Then
+            countarrayTables = arrayTables.Count
+        End If
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim boolCategory As Boolean = False
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Category" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If nameCategory Like reader.Value Then
+                                        boolCategory = True
+                                    Else
+                                        boolCategory = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Table" Then
+                            If boolCategory = True Then
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim value As String = reader.Value
+                                        If IsNothing(value) = False Then
+                                            If nameN Like "TableName" Then
+                                                ReDim Preserve arrayTables(countarrayTables)
+                                                arrayTables(countarrayTables) = reader.Value
+                                                countarrayTables += 1
+                                            End If
+                                        End If
+                                    End While
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LibrarySymbols" Then
+                            reader.Close()
+                            Return True
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает определенную строку из файла xml (Имя категории, Имя таблицы, Тип объекта, Описание объекта, результат - массив с Характеристиками)
+    Public Shared Function FuncReadDataObjectToXMLbyDesk(ByVal putchFileXml As String, ByVal category As String, ByVal table As String, ByVal typeObject As String, ByVal deskObject As String, ByRef dataObjectProperties As String(,)) As Boolean
+        FuncReadDataObjectToXMLbyDesk = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim boolCategory As Boolean = False
+            Dim boolTable As Boolean = False
+            Dim boolType As Boolean = False
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Category" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If category Like reader.Value Then
+                                        boolCategory = True
+                                    Else
+                                        boolCategory = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Table" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If table Like reader.Value Then
+                                        boolTable = True
+                                    Else
+                                        boolTable = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "TypeObject" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If typeObject Like reader.Value Then
+                                        boolType = True
+                                    Else
+                                        boolType = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Rows" Then
+                            Dim dataProperties As String(,) = Nothing
+                            Dim countDataProperties As Integer = 0
+                            Dim boolDataFind As Boolean = False
+                            If boolTable = True And boolCategory = True And boolType = True Then
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim NameObject As String = reader.Value
+                                        ReDim Preserve dataProperties(1, countDataProperties)
+                                        dataProperties(0, countDataProperties) = nameN
+                                        dataProperties(1, countDataProperties) = NameObject
+                                        countDataProperties += 1
+                                        If nameN Like "Description" Then
+                                            If Not (NameObject Like deskObject) Then
+                                                boolDataFind = False
+                                                Exit While
+                                            Else
+                                                boolDataFind = True
+                                            End If
+                                        End If
+                                    End While
+                                    If boolDataFind = True Then
+                                        dataObjectProperties = dataProperties
+                                        FuncReadDataObjectToXMLbyDesk = True
+                                        reader.Close()
+                                        Exit Function
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает определенную строку из файла xml (Имя категории, Имя таблицы, Тип объекта, Описание объекта, результат - массив с Характеристиками)
+    Public Shared Function FuncReadDataObjectToXMLbyRoburCode(ByVal putchFileXml As String, ByVal category As String, ByVal table As String, ByVal typeObject As String, ByVal roburCode As String, ByRef dataObjectProperties As String(,)) As Boolean
+        FuncReadDataObjectToXMLbyRoburCode = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim boolCategory As Boolean = False
+            Dim boolTable As Boolean = False
+            Dim boolType As Boolean = False
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Category" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If category Like reader.Value Then
+                                        boolCategory = True
+                                    Else
+                                        boolCategory = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Table" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If table Like reader.Value Then
+                                        boolTable = True
+                                    Else
+                                        boolTable = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "TypeObject" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    If typeObject Like reader.Value Then
+                                        boolType = True
+                                    Else
+                                        boolType = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Rows" Then
+                            Dim dataProperties As String(,) = Nothing
+                            Dim countDataProperties As Integer = 0
+                            Dim boolDataFind As Boolean = False
+                            If boolTable = True And boolCategory = True And boolType = True Then
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim NameObject As String = reader.Value
+                                        ReDim Preserve dataProperties(1, countDataProperties)
+                                        dataProperties(0, countDataProperties) = nameN
+                                        dataProperties(1, countDataProperties) = NameObject
+                                        countDataProperties += 1
+                                        If nameN Like "Object_code" Then
+                                            Dim arrayCode As String() = NameObject.Split(",")
+                                            If IsArray(arrayCode) = True Then
+                                                For k1 As Integer = 0 To arrayCode.Length - 1
+                                                    Dim tempCode As String = arrayCode(k1)
+                                                    If Not (tempCode Like roburCode) Then
+                                                        boolDataFind = False
+                                                    Else
+                                                        boolDataFind = True
+                                                        Exit For
+                                                    End If
+                                                Next k1
+                                            End If
+                                            If boolDataFind = False Then
+                                                Exit While
+                                            End If
+                                        End If
+                                    End While
+                                    If boolDataFind = True Then
+                                        dataObjectProperties = dataProperties
+                                        FuncReadDataObjectToXMLbyRoburCode = True
+                                        ReDim Preserve dataProperties(1, countDataProperties)
+                                        dataProperties(0, countDataProperties) = "TypeObject"
+                                        dataProperties(1, countDataProperties) = typeObject
+                                        reader.Close()
+                                        Exit Function
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает характеристики слоя из файла xml
+    Public Shared Function FuncReadPropertiesLayerToXML(ByVal putchFileXml As String, ByVal nameFindLayer As String, ByRef dataLayerProperties As String(,)) As Boolean
+        FuncReadPropertiesLayerToXML = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Layer" Then
+                            Dim boolfindLayer As Boolean = False
+                            Dim countDataLayerProperties As Integer = 0
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    Dim NameObject As String = reader.Value
+                                    If nameN Like "Name" Then
+                                        If Not (NameObject Like nameFindLayer) Then
+                                            Exit While
+                                        Else
+                                            boolfindLayer = True
+                                        End If
+                                    Else
+                                        ReDim Preserve dataLayerProperties(1, countDataLayerProperties)
+                                        dataLayerProperties(0, countDataLayerProperties) = nameN
+                                        dataLayerProperties(1, countDataLayerProperties) = NameObject
+                                        countDataLayerProperties += 1
+                                    End If
+                                End While
+                                If boolfindLayer = True Then
+                                    reader.Close()
+                                    Return True
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает характеристики типа линии из файла xml
+    Public Shared Function FuncReadPropertiesLineTypeToXML(ByVal putchFileXml As String, ByVal nameFindLineType As String, ByRef dataLayerProperties As String(,)) As Boolean
+        FuncReadPropertiesLineTypeToXML = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LinetypeRecord" Then
+                            Dim boolfindLineType As Boolean = False
+                            Dim countDataLineTypeProperties As Integer = 0
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameField As String = reader.Name
+                                    Dim value As String = reader.Value
+                                    If nameField Like "NameLineType" Then
+                                        If Not (value Like nameFindLineType) Then
+                                            Exit While
+                                        Else
+                                            boolfindLineType = True
+                                        End If
+                                    Else
+                                        ReDim Preserve dataLayerProperties(1, countDataLineTypeProperties)
+                                        dataLayerProperties(0, countDataLineTypeProperties) = nameField
+                                        dataLayerProperties(1, countDataLineTypeProperties) = value
+                                        countDataLineTypeProperties += 1
+                                    End If
+                                End While
+                                If boolfindLineType = True Then
+                                    reader.Close()
+                                    Return True
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LinetypeRecord" Then
+                            reader.Close()
+                            Exit Function
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает ищет имя таблицы объекта и возвращает все характеристики этого объекта
+    Public Shared Function FuncReadNameTableAndPropertiesObjectToXML(ByVal putchFileXml As String, ByVal nameObject As String, ByRef dataObjectProperties As String(,), Optional ByVal nameCategory As String = "", Optional ByVal typeObject As String = "") As String
+        FuncReadNameTableAndPropertiesObjectToXML = ""
+        Dim nameTable As String = ""
+        Dim boolCategory As Boolean = False
+        Dim boolTypeObject As Boolean = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Category" Then
+                            If nameCategory.Trim.Length = 0 Then
+                                boolCategory = True
+                            Else
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        If nameCategory Like reader.Value Then
+                                            boolCategory = True
+                                        Else
+                                            boolCategory = False
+                                        End If
+                                    End While
+                                End If
+                            End If
+                        ElseIf NameBlock Like "Table" Then
+                            If boolCategory = True Then
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        If nameN Like "TableName" Then
+                                            nameTable = reader.Value
+                                        End If
+                                    End While
+                                End If
+                            End If
+                        ElseIf NameBlock Like "TypeObject" Then
+                            If typeObject.Trim.Length = 0 Then
+                                boolTypeObject = True
+                            Else
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        If typeObject Like reader.Value Then
+                                            boolTypeObject = True
+                                        Else
+                                            boolTypeObject = False
+                                        End If
+                                    End While
+                                End If
+                            End If
+                        ElseIf NameBlock Like "Rows" Then
+                            Dim dataProperties As String(,) = Nothing
+                            Dim countDataProperties As Integer = 0
+                            Dim boolDataFind As Boolean = False
+                            If boolCategory = True And boolTypeObject = True Then
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameF As String = reader.Name
+                                        Dim ValueData As String = reader.Value
+                                        ReDim Preserve dataProperties(1, countDataProperties)
+                                        dataProperties(0, countDataProperties) = nameF
+                                        dataProperties(1, countDataProperties) = ValueData
+                                        countDataProperties += 1
+                                        If nameF Like "Name" Then
+                                            If Not (nameObject Like ValueData) Then
+                                                boolDataFind = False
+                                                Exit While
+                                            Else
+                                                boolDataFind = True
+                                            End If
+                                        End If
+                                    End While
+                                    If boolDataFind = True Then
+                                        dataObjectProperties = dataProperties
+                                        reader.Close()
+                                        Return nameTable
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает ищет имя таблицы объекта и возвращает все характеристики этого объекта
+    Public Shared Function FuncReadPropertiesObjectByNoteToXML(ByVal putchFileXml As String, ByVal deskObject As String, ByRef dataObjectProperties As String(,), ByVal valueNote As String, Optional ByVal nameCategory As String = "", Optional ByVal nameTable As String = "", Optional typeObject As String = "") As Boolean
+        FuncReadPropertiesObjectByNoteToXML = True
+        Dim boolCategory As Boolean = False
+        Dim boolTable As Boolean = False
+        Dim boolTypeObject As Boolean = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Category" Then
+                            If nameCategory.Trim.Length = 0 Then
+                                boolCategory = True
+                            Else
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        If nameCategory Like reader.Value Then
+                                            boolCategory = True
+                                        Else
+                                            boolCategory = False
+                                        End If
+                                    End While
+                                End If
+                            End If
+                        ElseIf NameBlock Like "Table" Then
+                            If boolCategory = True Then
+                                If nameTable.Trim.Length = 0 Then
+                                    boolTable = True
+                                Else
+                                    If reader.HasAttributes = True Then
+                                        While (reader.MoveToNextAttribute())
+                                            Dim nameN As String = reader.Name
+                                            If nameN Like "TableName" Then
+                                                boolTable = True
+                                            Else
+                                                boolTable = False
+                                            End If
+                                        End While
+                                    End If
+                                End If
+                            End If
+                        ElseIf NameBlock Like "TypeObject" Then
+                            If boolCategory = True And boolTable = True Then
+                                If typeObject.Trim.Length = 0 Then
+                                    boolTypeObject = True
+                                Else
+                                    If reader.HasAttributes = True Then
+                                        While (reader.MoveToNextAttribute())
+                                            Dim nameN As String = reader.Name
+                                            If typeObject Like reader.Value Then
+                                                boolTypeObject = True
+                                            Else
+                                                boolTypeObject = False
+                                            End If
+                                        End While
+                                    End If
+                                End If
+                            End If
+                        ElseIf NameBlock Like "Rows" Then
+                            Dim dataProperties As String(,) = Nothing
+                            Dim countDataProperties As Integer = 0
+                            Dim boolDataFind As Boolean = False
+                            If boolCategory = True And boolTable = True And boolTypeObject = True Then
+                                If reader.HasAttributes = True Then
+                                    Dim valNote As String = reader.GetAttribute("Note")
+                                    Dim str As String = "ParentObject=" & deskObject
+                                    Dim pos As Integer = valNote.IndexOf(str)
+                                    If pos > -1 Then
+                                        While (reader.MoveToNextAttribute())
+                                            Dim nameF As String = reader.Name
+                                            Dim ValueData As String = reader.Value
+                                            ReDim Preserve dataProperties(1, countDataProperties)
+                                            dataProperties(0, countDataProperties) = nameF
+                                            dataProperties(1, countDataProperties) = ValueData
+                                            countDataProperties += 1
+                                        End While
+                                        dataObjectProperties = dataProperties
+                                        reader.Close()
+                                        Return True
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '/////////////////////////////////////////////////////////////////////////////////////////////////////
+    'функция ищет код типа линии по имени типа линии
+    Public Shared Function FuncFindLineTypeCodeByNameTypeLineToXML(ByVal putchFileXml As String, ByVal nameLineType As String, Optional deskLine As String = "") As String
+        FuncFindLineTypeCodeByNameTypeLineToXML = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LinetypeRecord" Then
+                            Dim codeTypeLine As String = ""
+                            Dim deskLineTemp As String = ""
+                            Dim nameLineTemp As String = ""
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameN As String = reader.Name
+                                    Dim NameObject As String = reader.Value
+                                    If nameN Like "NameLineType" Then
+                                        nameLineTemp = NameObject
+                                    ElseIf nameN Like "CodeLineType" Then
+                                        codeTypeLine = NameObject
+                                    ElseIf nameN Like "DeskLineType" Then
+                                        deskLineTemp = NameObject
+                                    End If
+                                End While
+                                If nameLineTemp.Trim.Length > 0 Then
+                                    If nameLineTemp.Trim Like nameLineType Then
+                                        deskLine = deskLineTemp
+                                        reader.Close()
+                                        Return codeTypeLine.Trim
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LinetypeRecord" Then
+                            reader.Close()
+                            Exit Function
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция ищет код по описанию объекта
+    Public Shared Function FuncFindCodeObjectByDesk(ByVal putchFileXml As String, ByVal deck As String, Optional typeObject As String = "*") As String
+        FuncFindCodeObjectByDesk = ""
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        Dim typeObjectUser As String = "*"
+                        If NameBlock Like "TypeObject" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    typeObjectUser = reader.Value
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Rows" Then
+                            If typeObjectUser Like typeObjectUser Then
+                                Dim codeObject As String = ""
+                                Dim deskObject As String = ""
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim NameObject As String = reader.Value
+                                        If nameN Like "Description" Then
+                                            deskObject = NameObject
+                                        ElseIf nameN Like "Object_code" Then
+                                            codeObject = NameObject
+                                        End If
+                                    End While
+                                End If
+                                If codeObject.Trim.Length > 0 Then
+                                    If deskObject.Trim Like deck.Trim Then
+                                        reader.Close()
+                                        Return codeObject
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция ищет код дорожной разметки
+    Public Shared Function FuncFindCodeRoadsMarkToXML(ByVal putchFileXml As String, ByVal indexRoadsMark As String, ByRef dataRoadsMarkProperties As String(,), Optional speedRoad As String = "") As Boolean
+        FuncFindCodeRoadsMarkToXML = False
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        Dim boolRoadsMark As Boolean = False
+        If IsArray(dataRoadsMarkProperties) = True Then
+            Erase dataRoadsMarkProperties
+        End If
+        Dim countdataRoadsMarkProperties As Integer = 0
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "Table" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    If reader.Value Like "Дорожная разметка" Then
+                                        boolRoadsMark = True
+                                        Exit While
+                                    Else
+                                        boolRoadsMark = False
+                                    End If
+                                End While
+                            End If
+                        ElseIf NameBlock Like "Rows" Then
+                            If boolRoadsMark = True Then
+                                Dim strNote As String = ""
+                                Dim boolFindElement As Boolean = False
+                                If reader.HasAttributes = True Then
+                                    ReDim Preserve dataRoadsMarkProperties(1, reader.AttributeCount + 1)
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim NameObject As String = reader.Value
+                                        dataRoadsMarkProperties(0, countdataRoadsMarkProperties) = nameN
+                                        dataRoadsMarkProperties(1, countdataRoadsMarkProperties) = NameObject
+                                        countdataRoadsMarkProperties += 1
+                                        If nameN Like "Note" Then
+                                            Dim strIndex As String = ""
+                                            Dim strSpeed As String = ""
+                                            If IsNothing(NameObject) = False OrElse (NameObject.Trim.Length > 0) Then
+                                                Dim tempArrayNote As String() = NameObject.Split(";")
+                                                Dim indexFindMark As String = ""
+                                                Dim speedFindMark As String = ""
+                                                If IsArray(tempArrayNote) = True Then
+                                                    For i As Integer = 0 To tempArrayNote.Length - 1
+                                                        Dim noteStr As String = tempArrayNote(i)
+                                                        Dim pos1 As Integer = noteStr.IndexOf("GOST_NUMBER")
+                                                        Dim pos2 As Integer = noteStr.IndexOf("SPEED")
+                                                        Dim pos3 As Integer = noteStr.IndexOf("=")
+                                                        If pos1 > -1 Then
+                                                            indexFindMark = Mid(noteStr, pos3 + 2)
+                                                        ElseIf pos2 > -1 And pos3 > -1 Then
+                                                            speedFindMark = Mid(noteStr, pos3 + 2)
+                                                        End If
+                                                    Next i
+                                                End If
+                                                If indexFindMark.Trim Like indexRoadsMark.Trim Then
+                                                    If speedRoad.Trim.Length > 0 Then
+                                                        If speedRoad.Trim Like speedFindMark.Trim Then
+                                                            boolFindElement = True
+                                                        End If
+                                                    Else
+                                                        boolFindElement = True
+                                                    End If
+                                                End If
+                                                dataRoadsMarkProperties(0, countdataRoadsMarkProperties) = "GOST_NUMBER"
+                                                dataRoadsMarkProperties(1, countdataRoadsMarkProperties) = indexFindMark
+                                                countdataRoadsMarkProperties += 1
+                                                dataRoadsMarkProperties(0, countdataRoadsMarkProperties) = "SPEED"
+                                                dataRoadsMarkProperties(1, countdataRoadsMarkProperties) = speedFindMark
+                                            End If
+                                        End If
+                                    End While
+                                End If
+                                If boolFindElement = True Then
+                                    reader.Close()
+                                    Return True
+                                Else
+                                    countdataRoadsMarkProperties = 0
+                                End If
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LibrarySymbols" Then
+                            reader.Close()
+                            Exit Function
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает все имена типов линии из xml
+    Public Shared Function FuncReadLineTypesToXML(ByVal putchFileXml As String, ByRef arrayLineTypes As String()) As Boolean
+        FuncReadLineTypesToXML = False
+        Dim countArrayLineTypes As Integer = 0
+        If IsArray(arrayLineTypes) = True Then
+            countArrayLineTypes = arrayLineTypes.Length
+        End If
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LinetypeRecord" Then
+                            Dim boolfindLineType As Boolean = False
+                            Dim countDataLineTypeProperties As Integer = 0
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameField As String = reader.Name
+                                    Dim value As String = reader.Value
+                                    If nameField Like "NameLineType" Then
+                                        ReDim Preserve arrayLineTypes(countArrayLineTypes)
+                                        arrayLineTypes(countArrayLineTypes) = value
+                                        countArrayLineTypes += 1
+                                    End If
+                                End While
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "LinetypeRecords" Then
+                            reader.Close()
+                            Exit Function
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'читает характеристики стилей текста из файда XML
+    Public Shared Function FuncReadTextStylePropertiesToXML(ByVal putchFileXml As String, ByVal nameTextStyle As String, ByRef arrayTextStyle As String(,)) As Boolean
+        FuncReadTextStylePropertiesToXML = False
+        Dim countArrayLineTypes As Integer = 0
+        If File.Exists(putchFileXml) = True Then
+            'читаем xml и загружаем ветки с категориями
+            Dim xDoc As XmlDocument = New XmlDocument()
+            If IO.File.Exists(putchFileXml) = True Then
+                Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+                While reader.Read()
+                    Select Case reader.NodeType
+                        Case XmlNodeType.Element
+                            Dim NameBlock As String = reader.Name 'читаем ветку
+                            If NameBlock Like "TextStyle" Then
+                                Dim boolfindTextStyle As Boolean = False
+                                Dim countDataProperties As Integer = 0
+                                Erase arrayTextStyle
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim NameObject As String = reader.Value
+                                        If nameN Like "NameTextStyle" Then
+                                            If Not (NameObject Like nameTextStyle) Then
+                                                Exit While
+                                            Else
+                                                boolfindTextStyle = True
+                                            End If
+                                        End If
+                                        ReDim Preserve arrayTextStyle(1, countDataProperties)
+                                        arrayTextStyle(0, countDataProperties) = nameN
+                                        arrayTextStyle(1, countDataProperties) = NameObject
+                                        countDataProperties += 1
+                                    End While
+                                    If boolfindTextStyle = True Then
+                                        reader.Close()
+                                        Return True
+                                    End If
+                                End If
+                            End If
+                        Case XmlNodeType.EndElement
+                            Dim NameBlock As String = reader.Name 'читаем ветку
+                            If NameBlock Like "TextStyles" Then
+                                reader.Close()
+                                Exit Function
+                            End If
+                    End Select
+                End While
+                reader.Close()
+            End If
+        End If
+    End Function
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'читает характеристики стиля мультивыноски из файда XML
+    Public Shared Function FuncReadMLederStylePropertiesToXML(ByVal putchFileXml As String, ByVal nameStyleMLeader As String, ByRef arrayMLeaderStyle As String(,)) As Boolean
+        FuncReadMLederStylePropertiesToXML = False
+        If File.Exists(putchFileXml) = True Then
+            'читаем xml и загружаем ветки с категориями
+            Dim xDoc As XmlDocument = New XmlDocument()
+            If IO.File.Exists(putchFileXml) = True Then
+                Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+                While reader.Read()
+                    Select Case reader.NodeType
+                        Case XmlNodeType.Element
+                            Dim NameBlock As String = reader.Name 'читаем ветку
+                            If NameBlock Like "MLeaderStyle" Then
+                                Dim boolfindStyle As Boolean = False
+                                Dim countDataProperties As Integer = 0
+                                Erase arrayMLeaderStyle
+                                If reader.HasAttributes = True Then
+                                    While (reader.MoveToNextAttribute())
+                                        Dim nameN As String = reader.Name
+                                        Dim NameObject As String = reader.Value
+                                        If nameN Like "NameMLeaderStyle" Then
+                                            If Not (NameObject Like nameStyleMLeader) Then
+                                                Exit While
+                                            Else
+                                                boolfindStyle = True
+                                            End If
+                                        End If
+                                        ReDim Preserve arrayMLeaderStyle(1, countDataProperties)
+                                        arrayMLeaderStyle(0, countDataProperties) = nameN
+                                        arrayMLeaderStyle(1, countDataProperties) = NameObject
+                                        countDataProperties += 1
+                                    End While
+                                    If boolfindStyle = True Then
+                                        reader.Close()
+                                        Return True
+                                    End If
+                                End If
+                            End If
+                        Case XmlNodeType.EndElement
+                            Dim NameBlock As String = reader.Name 'читаем ветку
+                            If NameBlock Like "MLeaderStyle" Then
+                                reader.Close()
+                                Exit Function
+                            End If
+                    End Select
+                End While
+                reader.Close()
+            End If
+        End If
+    End Function
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция читает все имена таблиц pS из xml
+    Public Shared Function FuncReadPSTablesToXML(ByVal putchFileXml As String, ByRef arrayPSTables As String()) As Boolean
+        FuncReadPSTablesToXML = False
+        Dim countarrayPSTables As Integer = 0
+        If IsArray(arrayPSTables) = True Then
+            countarrayPSTables = arrayPSTables.Length
+        End If
+        'читаем xml и загружаем ветки с категориями
+        Dim xDoc As XmlDocument = New XmlDocument()
+        If IO.File.Exists(putchFileXml) = True Then
+            Dim reader As XmlTextReader = New XmlTextReader(putchFileXml)
+            While reader.Read()
+                Select Case reader.NodeType
+                    Case XmlNodeType.Element
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "PropertyTable" Then
+                            If reader.HasAttributes = True Then
+                                While (reader.MoveToNextAttribute())
+                                    Dim nameField As String = reader.Name
+                                    Dim value As String = reader.Value
+                                    If nameField Like "TableName" Then
+                                        ReDim Preserve arrayPSTables(countarrayPSTables)
+                                        arrayPSTables(countarrayPSTables) = value
+                                        countarrayPSTables += 1
+                                    End If
+                                End While
+                            End If
+                        End If
+                    Case XmlNodeType.EndElement
+                        Dim NameBlock As String = reader.Name 'читаем ветку
+                        If NameBlock Like "PropertyTables" Then
+                            reader.Close()
+                            If IsArray(arrayPSTables) = True Then
+                                Return True
+                            Else
+                                Return False
+                            End If
+                        End If
+                End Select
+            End While
+            reader.Close()
+        End If
+    End Function
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'функция возвращает определенное значение из массива
+    Public Shared Function FuncReturnValueByArrayProperties(ByVal nameF As String, ByRef arrayPropertiesObject As String(,)) As String
+        FuncReturnValueByArrayProperties = ""
+        If IsArray(arrayPropertiesObject) = True Then
+            For i As Integer = 0 To arrayPropertiesObject.GetUpperBound(1)
+                Dim nameField As String = arrayPropertiesObject(0, i)
+                If IsNothing(nameField) = False Then
+                    If nameField.Trim Like nameF Then
+                        Return arrayPropertiesObject(1, i)
+                    End If
+                End If
+            Next i
+        End If
+    End Function
+
+
+End Class

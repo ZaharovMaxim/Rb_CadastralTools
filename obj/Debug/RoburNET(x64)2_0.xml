@@ -1,0 +1,91 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+RoburNET(x64)2_0
+</name>
+</assembly>
+<members>
+<member name="T:RoburNET_x64_2_0.My.Resources.Resources">
+<summary>
+  Класс ресурса со строгой типизацией для поиска локализованных строк и т.д.
+</summary>
+</member>
+<member name="P:RoburNET_x64_2_0.My.Resources.Resources.ResourceManager">
+<summary>
+  Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
+</summary>
+</member>
+<member name="P:RoburNET_x64_2_0.My.Resources.Resources.Culture">
+<summary>
+  Перезаписывает свойство CurrentUICulture текущего потока для всех
+  обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
+</summary>
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.DoPolygonsIntersect(NetTopologySuite.Geometries.Polygon,NetTopologySuite.Geometries.Polygon)">
+ Проверяет, пересекаются ли два полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetIntersection(NetTopologySuite.Geometries.Polygon,NetTopologySuite.Geometries.Polygon)">
+ Получает область пересечения полигонов
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetIntersectionInfo(NetTopologySuite.Geometries.Polygon,NetTopologySuite.Geometries.Polygon)">
+ Получает детальную информацию о пересечении
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.IsConvex(NetTopologySuite.Geometries.Polygon)">
+ Проверяет, является ли полигон выпуклым
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetDistance(NetTopologySuite.Geometries.Polygon,NetTopologySuite.Geometries.Polygon)">
+ Вычисляет расстояние между полигонами
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.DoesLineIntersectPolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Проверяет, пересекает ли полилиния полигон
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.IsLineInsidePolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Проверяет, находится ли полилиния полностью внутри полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.DoesLineTouchPolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Проверяет, касается ли полилиния границы полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.DoesLineCrossPolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Проверяет, пересекает ли полилиния границу полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetIntersectionPoints(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Получает точки пересечения полилинии с полигоном
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetLineSegmentsInsidePolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Получает сегменты полилинии, которые находятся внутри полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetLengthInsidePolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Получает длину полилинии внутри полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GetPercentageInsidePolygon(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon)">
+ Получает процент полилинии внутри полигона
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.DoesLineCrossAtPoint(NetTopologySuite.Geometries.LineString,NetTopologySuite.Geometries.Polygon,NetTopologySuite.Geometries.Point)">
+ Проверяет, пересекает ли полилиния границу полигона в указанной точке
+</member>
+<member name="M:RoburNET_x64_2_0.FuncTopologySuite.GenerateTestPointsInsidePolygon(NetTopologySuite.Geometries.Polygon,System.Int32)">
+ Генерирует тестовые точки внутри полигона
+</member>
+<member name="T:RoburNET_x64_2_0.IntersectionInfo">
+ <summary>
+ Класс для хранения информации о пересечении
+ </summary>
+</member>
+<member name="T:RoburNET_x64_2_0.PolygonLineIntersectionInfo">
+ <summary>
+ Класс для хранения информации о пересечении
+ </summary>
+</member>
+<member name="M:RoburNET_x64_2_0.MathFunction.CreatePolygon(NetTopologySuite.Geometries.GeometryFactory,System.Double[])">
+ <summary>
+ Создает многоугольник из массива координат
+ </summary>
+</member>
+<member name="M:RoburNET_x64_2_0.MathFunction.SolveByBisection(System.Double,System.Double)">
+ <summary>
+ Решение уравнения методом бисекции (для сложных случаев)
+ </summary>
+</member>
+</members>
+</doc>

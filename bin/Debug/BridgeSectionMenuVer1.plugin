@@ -1,0 +1,66 @@
+﻿{
+  "assemblies": {
+    "tutroial1": {
+      "assembly": "BridgeSectionMenu.dll, BridgeSectionMenu.ModulePluginHost"
+    }
+  },
+  "actions": {
+    "id_show_my_window": {
+      "cmd": "show_my_window",
+      "title": "Показать моё окно"
+    },
+    "id_empty_action": {
+      "cmd": "",
+      "title": "Пустая кнопка",
+      "icon": "ic_file"
+    },
+    "id_add_section_window": {
+      "cmd": "add_section_window",
+      "title": "Добавить окно сечения"
+    }
+  },
+  "menubars": {
+    "rbproj": {
+      "items": [
+        {
+          "id": "test_menu",
+          "title": "Примеры"
+        }
+      ]
+    },
+    "rbproj.test_menu": {
+      "items": [
+        "id_show_my_window",
+        "id_add_section_window"
+      ]
+    }
+  },
+  "toolbars": {
+    "rbproj.my_document_window": [
+      {
+        "id": "my_document_window",
+        "title": "Мой тулбар",
+        "dock": 1,
+        "visible": true,
+        "x": 0,
+        "y": 0,
+        "flags": "0",
+        "items": [
+          "id_empty_action",
+          "id_empty_action"
+        ]
+      }
+    ]
+  },
+  "statusbar": {
+    "rbproj.my_document_window": {
+      "priority": 1000,
+      "items": [
+        {
+          "textbox": "$(ccadviewx,my_document_window) $(ccadviewy,my_document_window)",
+          "width": 170
+        }
+      ]
+    }
+  }
+}
