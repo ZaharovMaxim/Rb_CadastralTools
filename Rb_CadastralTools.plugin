@@ -5,7 +5,7 @@
     }
   },
   "actions": {
-     "id_EditXMLSymbols": {
+    "id_EditXMLSymbols": {
       "cmd": "EditXMLSymbols",
       "title": "Редактор шаблона"
     },
@@ -84,7 +84,11 @@
     "id_FiltreKPT": {
       "cmd": "FiltreKPT",
       "title": "Сводный план"
-    }    
+    },
+    "id_UpdateProgram": {
+      "cmd": "UpdateProgram",
+      "title": "Обновить"
+    }
   },
   "menubars": {
     "rbproj": {
@@ -126,7 +130,8 @@
         "id_ReportCadastralZones",
         "id_ReportPMT",
         "-",
-        "id_ExportCadastralData"
+        "id_ExportCadastralData",
+        "id_UpdateProgram"
       ]
     }
   },

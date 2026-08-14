@@ -7,6 +7,50 @@ Imports Topomatic.Dwg.Entities
 Public Class CadastralFunction
     '==================================================================================================================================
     'функция ищет все участки на чертеже (массив, 0-номер участка, 1-ID)
+    Public Shared Function getNumberCadastralObject(ByVal ActivDocument As Drawing) As List(Of String)
+        Dim result As List(Of String) = New List(Of String)
+        If IsNothing(ActivDocument) = False Then
+            For Each acEnt As DwgEntity In ActivDocument.ActiveSpace.Entities
+                If acEnt.HasExtensionDictionary = True Then
+                    Dim dataSreuctureElement As CadastralTools.StructureElement = Nothing
+                    Dim boolReadData As Boolean = FuncXRecords.getXRecords(acEnt, dataSreuctureElement, CadastralTools.StructureElement.tableXRecords.PROJECT_STRUCTURES)
+                    If IsNothing(dataSreuctureElement) = False And boolReadData = True Then
+                        If dataSreuctureElement.NameClassObject = CadastralTools.StructureElement.classObject.LAND_CADASTRAL Then
+                            Dim keyParam As String = dataSreuctureElement.KeyParameter
+                            Dim cadNumberObj As Object = CadastralTools.JsonValidator.GetValueFromJson(keyParam, "Cad_number")
+                            Dim boolFindNumber As Boolean = False
+                            If IsNothing(cadNumberObj) = False Then
+                                If TypeOf cadNumberObj Is String Then
+                                    Dim cadNumber As String = cadNumberObj
+                                    If cadNumber.Trim.Length > 0 Then
+                                        result.Add(cadNumber)
+                                        boolFindNumber = True
+                                    End If
+                                End If
+                            End If
+                            If boolFindNumber = False Then
+                                cadNumberObj = CadastralTools.JsonValidator.GetValueFromJson(keyParam, "Rec_numb_border")
+                                If IsNothing(cadNumberObj) = False Then
+                                    If TypeOf cadNumberObj Is String Then
+                                        Dim cadNumber As String = cadNumberObj
+                                        If cadNumber.Trim.Length > 0 Then
+                                            result.Add(cadNumber)
+                                        End If
+                                    End If
+                                End If
+                            End If
+                        End If
+                    End If
+                End If
+            Next
+        End If
+        Return result
+    End Function
+
+
+
+    '==================================================================================================================================
+    'функция ищет все участки на чертеже (массив, 0-номер участка, 1-ID)
     Public Shared Function FuncFindCadastralParcels(ByVal ActivDocument As Drawing, ByVal deskObject As String, ByRef arrayData As String(,)) As Integer
         FuncFindCadastralParcels = 0
         Dim countParcels As Integer = 0

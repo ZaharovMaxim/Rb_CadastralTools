@@ -59,23 +59,28 @@
     </Reference>
     <Reference Include="CadastralTools">
       <HintPath>K:\Civil3DToolsUtility\NET\CadastralTools.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="NetTopologySuite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL">
-      <HintPath>packages\NetTopologySuite.2.6.0\lib\netstandard2.0\NetTopologySuite.dll</HintPath>
+      <HintPath>packages\NetTopologySuite.2.0.0\lib\netstandard2.0\NetTopologySuite.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>D:\NET\Topomatic Robur Road 16.0\System.Buffers.dll</HintPath>
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Memory, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Memory.4.6.0\lib\net462\System.Memory.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -273,18 +278,9 @@
     <Compile Include="CadastralFunction\CadastralFunction.vb" />
     <Compile Include="FuncTransform\CoordinateTransform.vb" />
     <Compile Include="CreateDWGObject\CreateDWGObject.vb" />
-    <Compile Include="CreateModel\BridgeModel.vb" />
-    <Compile Include="CreateModel\EditModelDlg.Designer.vb">
-      <DependentUpon>EditModelDlg.vb</DependentUpon>
-    </Compile>
-    <Compile Include="CreateModel\EditModelDlg.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CreateModel\EditorBridgeModel.vb" />
     <Compile Include="DataXRecords\DataXRecords.vb" />
     <Compile Include="FuncAlignment\FuncAlignment.vb" />
     <Compile Include="FuncConvertData\FuncConvertData.vb" />
-    <Compile Include="FuncDecorPlane\FuncDecorPlane.vb" />
     <Compile Include="FuncFormat\FuncFormatZn.vb" />
     <Compile Include="FuncHasp\PostNET.vb" />
     <Compile Include="FuncSurface\FuncSurface.vb" />
@@ -391,12 +387,6 @@
     <Compile Include="UserForms\FormCadastral\FormReportCatalogCoordinates.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UserForms\FormCadastral\FormRosreestrKPTImport.Designer.vb">
-      <DependentUpon>FormRosreestrKPTImport.vb</DependentUpon>
-    </Compile>
-    <Compile Include="UserForms\FormCadastral\FormRosreestrKPTImport.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="UserForms\FormSelectCheckBox.Designer.vb">
       <DependentUpon>FormSelectCheckBox.vb</DependentUpon>
     </Compile>
@@ -429,9 +419,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="CreateModel\EditModelDlg.resx">
-      <DependentUpon>EditModelDlg.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UserForms\FormCadastral\FormAutoCreateParcels.resx">
       <DependentUpon>FormAutoCreateParcels.vb</DependentUpon>
     </EmbeddedResource>
@@ -476,9 +463,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserForms\FormCadastral\FormReportCatalogCoordinates.resx">
       <DependentUpon>FormReportCatalogCoordinates.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UserForms\FormCadastral\FormRosreestrKPTImport.resx">
-      <DependentUpon>FormRosreestrKPTImport.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserForms\FormSelectCheckBox.resx">
       <DependentUpon>FormSelectCheckBox.vb</DependentUpon>

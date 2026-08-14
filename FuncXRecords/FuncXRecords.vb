@@ -5,6 +5,7 @@ Imports Topomatic.Cad.Foundation
 Imports Topomatic.Dwg
 Imports Topomatic.Dwg.Entities
 Imports Topomatic.Pipes.Runtime.Plt.Profile.DescrEnumConverters
+Imports CadastralTools
 
 Public Class FuncXRecords
     'чтение значений xData с примитива
@@ -36,11 +37,11 @@ Public Class FuncXRecords
                                     If nameF Like "Label" Or nameF Like "LABEL" Then
                                         xData.Label = valF
                                     ElseIf nameF Like "ClassBridgeObject" Then
-                                        xData.ClassBridgeObject = CType([Enum].Parse(GetType(StructureElement.classBridge), valF), StructureElement.classBridge)
+                                        xData.TypeGeometry = CType([Enum].Parse(GetType(StructureElement.typeGeometryObject), valF), StructureElement.typeGeometryObject)
                                     ElseIf nameF Like "ClassObject" Then
-                                        xData.ClassObject = CType([Enum].Parse(GetType(StructureElement.classStructure), valF), StructureElement.classStructure)
+                                        xData.NameClassObject = CType([Enum].Parse(GetType(StructureElement.classObject), valF), StructureElement.classObject)
                                     ElseIf nameF Like "Name" Or nameF Like "NAME" Then
-                                        xData.Name = CType([Enum].Parse(GetType(StructureElement.typeObject), valF), StructureElement.typeObject)
+                                        xData.NameTypeObject = CType([Enum].Parse(GetType(StructureElement.nameObject), valF), StructureElement.nameObject)
                                     ElseIf nameF Like "Description" Then
                                         xData.Description = valF
                                     ElseIf nameF Like "KeyParameters" Then
@@ -54,69 +55,7 @@ Public Class FuncXRecords
                                     End If
                                 Next k
                                 xData.IdObject = entity.ObjectID
-                                xData.DWGEntity = entity
                                 Return True
-                            End If
-                        ElseIf dictionaryName Like StructureElement.tableXRecords.PROJECT_BRIDGE.ToString Then
-                            'читаем данные старого формата
-                            'словарь найден
-                            Dim arrayData As String(,) = {}
-                            Dim tempDictionary2 As DwgDictionary = tempUserDictionary.Value
-                            'читаем имена полей
-                            If tempDictionary2.Count > 1 Then
-                                Dim countArrayData As Integer = 0
-                                For j As Integer = 2 To tempDictionary2.Count - 1
-                                    Dim tempDictionary3 As KeyValuePair(Of String, Object) = tempDictionary2.ElementAt(j)
-                                    'читаем строки таблмцы
-                                    Dim tempDictionary4 As DwgDictionary = tempDictionary3.Value
-                                    If tempDictionary4.Count > 0 Then
-                                        ReDim Preserve arrayData(5, countArrayData)
-                                        For k As Integer = 0 To tempDictionary4.Count - 1
-                                            Dim rez As KeyValuePair(Of String, Object) = tempDictionary4.ElementAt(k)
-                                            Dim nameF As String = rez.Key
-                                            Dim valF As String = rez.Value
-                                            If nameF Like "Name" Then
-                                                arrayData(0, countArrayData) = valF
-                                            ElseIf nameF Like "Value" Then
-                                                arrayData(1, countArrayData) = valF
-                                            ElseIf nameF Like "Description" Then
-                                                arrayData(2, countArrayData) = valF
-                                            ElseIf nameF Like "DefaultData" Then
-                                                arrayData(3, countArrayData) = valF
-                                            ElseIf nameF Like "TypeField" Then
-                                                arrayData(4, countArrayData) = valF
-                                            ElseIf nameF Like "DisplayOrder" Then
-                                                arrayData(5, countArrayData) = valF
-                                            End If
-                                        Next k
-                                        countArrayData += 1
-                                    End If
-                                Next j
-                            End If
-                            'анализируем структуру массива и заполняем класс
-                            If arrayData.Length > 0 Then
-                                For j As Integer = 0 To arrayData.GetUpperBound(1)
-                                    Dim nameAF As String = arrayData(0, j)
-                                    Dim valAF As String = arrayData(1, j)
-                                    If nameAF Like "Label" Or nameAF Like "LABEL" Then
-                                        xData.Label = valAF
-                                    ElseIf nameAF Like "Name" Or nameAF Like "NAME" Then
-                                        xData.Description = valAF
-                                    ElseIf nameAF Like "Description" Then
-                                        xData.Name = valAF
-                                    ElseIf nameAF Like "KeyParameters" Then
-                                        xData.KeyParameter = valAF
-                                    ElseIf nameAF Like "IdStructure" Or nameAF Like "BrigeID" Then
-                                        xData.IdStructure = valAF
-                                    ElseIf nameAF Like "IdElement" Or nameAF Like "ElementID" Then
-                                        xData.IdElement = valAF
-                                    ElseIf nameAF Like "Note" Or nameAF Like "NOTE" Then
-                                        xData.Note = valAF
-                                    End If
-                                Next j
-                                xData.IdObject = entity.ObjectID
-                                xData.Name = xData.getNameStructure(xData.Description)
-                                'Return True
                             End If
                         End If
                     Next i
@@ -203,9 +142,9 @@ Public Class FuncXRecords
     Private Shared Sub SetFieldData(ByVal fieldDictionary As DwgDictionary, ByVal entity As DwgEntity, ByVal xData As StructureElement)
         ' Устанавливаем данные полей с проверкой на пустые значения
         SetStringIfNotEmpty(fieldDictionary, "Label", xData.Label)
-        SetStringIfNotEmpty(fieldDictionary, "ClassObject", xData.ClassObject)
-        SetStringIfNotEmpty(fieldDictionary, "ClassBridgeObject", xData.ClassBridgeObject)
-        SetStringIfNotEmpty(fieldDictionary, "Name", xData.Name)
+        SetStringIfNotEmpty(fieldDictionary, "NameClassObject", xData.NameClassObject)
+        SetStringIfNotEmpty(fieldDictionary, "TypeGeometry", xData.TypeGeometry)
+        SetStringIfNotEmpty(fieldDictionary, "NameTypeObject", xData.NameTypeObject)
         SetStringIfNotEmpty(fieldDictionary, "Description", xData.Description)
         SetStringIfNotEmpty(fieldDictionary, "KeyParameters", xData.KeyParameter)
         SetStringIfNotEmpty(fieldDictionary, "IdStructure", xData.IdStructure)

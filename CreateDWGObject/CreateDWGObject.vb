@@ -67,7 +67,7 @@ Public Class CreateDWGObject
                                 Dim arrayPropertiesTextStyle As String(,) = {}
                                 Dim boolReadTextStyleProperties As Boolean = CadastralTools.TemplateXML.FuncReadTextStylePropertiesInfoToXML(templateXML, valueField, arrayPropertiesTextStyle)
                                 If arrayPropertiesTextStyle.Length > 0 Then
-                                    textStyle = FuncStyles.FuncCreateTextStyleByArray(ActiveDrawing, valueField, arrayPropertiesTextStyle)
+                                    textStyle = StyleCadastralObject.FuncCreateTextStyleByArray(ActiveDrawing, valueField, arrayPropertiesTextStyle)
                                 End If
                             End If
                             result.Style = textStyle
@@ -129,7 +129,7 @@ Public Class CreateDWGObject
                                 ElseIf nameArrow Like "_Small" Then
                                     result.ArrowheadType = AcDimArrowheadType.Small
                                 Else
-                                    Dim userBlock As DwgBlock = FuncStyles.containsBlock(ActiveDrawing, nameArrow)
+                                    Dim userBlock As DwgBlock = ActiveDrawing.Blocks.Item(nameArrow)
                                     If IsNothing(userBlock) = True Then
                                         userBlock = RoburFunc.FuncInsertBlockByDWGFile(ActiveDrawing, templateDWG, nameArrow)
                                     End If
@@ -150,4 +150,47 @@ Public Class CreateDWGObject
         End Try
         Return result
     End Function
+
+    'создание полилинии из массива точек (0-x, 1-y)
+    Public Function createPolylineToArrayPoint(ByRef ArrayVertex2d As String(,), Optional ByVal boolClosed As Boolean = False, Optional boolReverse As Boolean = False) As DwgPolyline
+        Dim result As DwgPolyline = Nothing
+        If IsArray(ArrayVertex2d) = True Then
+            If ArrayVertex2d.GetUpperBound(0) > 0 Then
+                Dim rp As Topomatic.Cad.Foundation.Vector3D = Nothing
+                Dim polyline As DwgPolyline = New Topomatic.Dwg.Entities.DwgPolyline()
+                If boolReverse = False Then
+                    For i As Integer = 0 To ArrayVertex2d.GetUpperBound(0)
+                        rp.X = ArrayVertex2d(i, 0)
+                        rp.Y = ArrayVertex2d(i, 1)
+                        rp.Z = 0
+                        Dim pos = New Topomatic.Cad.Foundation.Vector2D(rp.X, rp.Y)
+                        Dim bulgeSegment As Single = 0
+                        polyline.Add(New Topomatic.Cad.Foundation.BugleVector2D(pos, bulgeSegment))
+                    Next i
+                Else
+                    For i As Integer = ArrayVertex2d.GetUpperBound(0) To 0 Step -1
+                        rp.X = ArrayVertex2d(i, 0)
+                        rp.Y = ArrayVertex2d(i, 1)
+                        rp.Z = 0
+                        Dim pos = New Topomatic.Cad.Foundation.Vector2D(rp.X, rp.Y)
+                        Dim bulgeSegment As Single = 0
+                        polyline.Add(New Topomatic.Cad.Foundation.BugleVector2D(pos, bulgeSegment))
+                    Next i
+                End If
+                If polyline.Count > 1 Then
+                    If IsNothing(ActiveDrawing) = False Then
+                        ActiveDrawing.ActiveSpace.Add(polyline)
+                        If boolClosed = True Then
+                            polyline.Closed = True
+                        End If
+                        Return polyline
+                    End If
+                End If
+                result = polyline
+            End If
+        End If
+        Return result
+    End Function
+
+
 End Class

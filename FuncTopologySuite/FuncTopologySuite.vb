@@ -1,8 +1,10 @@
-﻿Imports NetTopologySuite.Geometries
+﻿Imports GeoAPI.Geometries
+Imports NetTopologySuite.Geometries
 Imports NetTopologySuite.Operation.Distance
 Imports NetTopologySuite.Operation.Union
 Imports NetTopologySuite.Simplify
 Imports Topomatic.Dwg.Entities
+Imports Coordinate = NetTopologySuite.Geometries.Coordinate
 
 Public Class FuncTopologySuite
     Private ReadOnly _geometryFactory As GeometryFactory
@@ -12,7 +14,7 @@ Public Class FuncTopologySuite
     End Sub
 
     ' Создает полигон из полилинии
-    Public Function CreatePolygon(ByVal polyline As DwgPolyline) As Polygon
+    Public Function CreatePolygonByPolyline(ByVal polyline As DwgPolyline) As Polygon
         If polyline.Count < 3 Then
             Return Nothing
         End If

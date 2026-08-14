@@ -548,13 +548,13 @@ Public Class PanelSymbolTOPO
                 '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
                 If arraytag.GetUpperBound(1) > 0 Then
                     If typeUserObject Like "Полилиния" Or typeUserObject Like "Линия" Or typeUserObject Like "Характерная линия" Or typeUserObject Like "Откос" Or typeUserObject Like "Дополнительная ось" Or typeUserObject Like "Бордюр" Or typeUserObject Like "Бордюр" Or typeUserObject Like "Структурная линия" Or typeUserObject Like "Дорожная разметка" Or typeUserObject Like "Ось трассы" Then
-                        Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, templateXML, arraytag, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, PSTable, note, gWidthUserTypeLine)
+                        'Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, templateXML, arraytag, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, PSTable, note, gWidthUserTypeLine)
                     ElseIf typeUserObject Like "Участок" Or typeUserObject Like "Штриховка" Then
-                        FuncDecorPlane.FuncCreateStyleHatchObject(ActivDocument, templateXML, arraytag, nameUserObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, scaleUserObject, angleUserObject, PSTable, note)
+                        'FuncDecorPlane.FuncCreateStyleHatchObject(ActivDocument, templateXML, arraytag, nameUserObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, scaleUserObject, angleUserObject, PSTable, note)
                     ElseIf typeUserObject Like "Блок" Then
-                        FuncDecorPlane.FuncCreateStylePointObject(ActivDocument, templateXML, arraytag, nameCreateObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, scaleUserObject, angleUserObject, attributeHeight, PSTable, note)
+                        'FuncDecorPlane.FuncCreateStylePointObject(ActivDocument, templateXML, arraytag, nameCreateObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, scaleUserObject, angleUserObject, attributeHeight, PSTable, note)
                     ElseIf typeUserObject Like "Мультивыноска" Then
-                        FuncDecorPlane.FuncCreateStyleLeaderObject(ActivDocument, templateXML, arraytag, nameCreateObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, textStyle, hText, nameArrow, arrowSize, PSTable, note)
+                        'FuncDecorPlane.FuncCreateStyleLeaderObject(ActivDocument, templateXML, arraytag, nameCreateObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, textStyle, hText, nameArrow, arrowSize, PSTable, note)
                     End If
                 End If
                 '===========================================================================================================
@@ -690,13 +690,13 @@ Public Class PanelSymbolTOPO
                         '==========================================================================================
                         'проверяем стиль текста и загружаем в случае необходимости
                         Dim ID_Rng As String = ""
-                            userTextStyle = FuncStyles.FuncReturnTextStyle(ActivDocument, textStyle)
-                            If IsNothing(userTextStyle) = True Then
+                        userTextStyle = StyleCadastralObject.FuncReturnTextStyle(ActivDocument, textStyle)
+                        If IsNothing(userTextStyle) = True Then
                                 Dim arrayPropertiesTextStyle As String(,) = Nothing
                                 Dim boolFindTextStyleXML As Boolean = FuncXML.FuncReadTextStylePropertiesToXML(templateXML, textStyle, arrayPropertiesTextStyle)
                                 If IsArray(arrayPropertiesTextStyle) = True Then
-                                    Dim createTextStyle As DwgStyle = FuncStyles.FuncCreateTextStyleByArray(ActivDocument, textStyle, arrayPropertiesTextStyle)
-                                    If IsNothing(createTextStyle) = False Then
+                                Dim createTextStyle As DwgStyle = StyleCadastralObject.FuncCreateTextStyleByArray(ActivDocument, textStyle, arrayPropertiesTextStyle)
+                                If IsNothing(createTextStyle) = False Then
                                         userTextStyle = createTextStyle
                                     End If
                                 End If
@@ -1579,7 +1579,7 @@ Public Class PanelSymbolTOPO
                                         Dim tnWidthLine As Double = 20
                                         Dim boolFindData As Boolean = FuncXML.FuncReadDataObjectToXMLbyDesk(templateXML, nameCategoryTable, nameTables, typeUserObject, "Тангенциальный ход", arrayPropertiesObject)
                                         If IsArray(arrayPropertiesObject) = True Then
-                                            Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, templateXML, arrayPropertiesObject, tnLayer, tnTypeLine, tnColor, tnScaleTypeLine, tnWidthLine)
+                                            'Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, templateXML, arrayPropertiesObject, tnLayer, tnTypeLine, tnColor, tnScaleTypeLine, tnWidthLine)
                                         End If
                                         Dim plLine As PlanLine = userAlign.Plan
                                         Dim vert As Topomatic.Alg.Plan.PlanLine.Vertex

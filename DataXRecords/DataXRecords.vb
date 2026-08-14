@@ -33,8 +33,10 @@ Public Class DataXRecords
                                         xData.Label = valF
                                     ElseIf nameF Like "ClassObject" Then
                                         xData.NameClassObject = CType([Enum].Parse(GetType(StructureElement.classObject), valF), StructureElement.classObject)
+                                    ElseIf nameF Like "ClassObject" Then
+                                        xData.TypeGeometry = CType([Enum].Parse(GetType(StructureElement.typeGeometryObject), valF), StructureElement.typeGeometryObject)
                                     ElseIf nameF Like "Name" Or nameF Like "NAME" Then
-                                        xData.Name = valF
+                                        xData.NameTypeObject = CType([Enum].Parse(GetType(StructureElement.nameObject), valF), StructureElement.nameObject)
                                     ElseIf nameF Like "Description" Then
                                         xData.Description = valF
                                     ElseIf nameF Like "KeyParameters" Then
@@ -135,8 +137,9 @@ Public Class DataXRecords
     Private Shared Sub SetFieldData(ByVal fieldDictionary As DwgDictionary, ByVal entity As DwgEntity, ByVal xData As StructureElement)
         ' Устанавливаем данные полей с проверкой на пустые значения
         SetStringIfNotEmpty(fieldDictionary, "Label", xData.Label)
-        SetStringIfNotEmpty(fieldDictionary, "ClassObject", xData.NameClassObject)
-        SetStringIfNotEmpty(fieldDictionary, "Name", xData.Name)
+        SetStringIfNotEmpty(fieldDictionary, "NameClassObject", xData.NameClassObject)
+        SetStringIfNotEmpty(fieldDictionary, "TypeGeometry", xData.TypeGeometry)
+        SetStringIfNotEmpty(fieldDictionary, "NameTypeObject", xData.NameTypeObject)
         SetStringIfNotEmpty(fieldDictionary, "Description", xData.Description)
         SetStringIfNotEmpty(fieldDictionary, "KeyParameters", xData.KeyParameter)
         SetStringIfNotEmpty(fieldDictionary, "IdStructure", xData.IdStructure)

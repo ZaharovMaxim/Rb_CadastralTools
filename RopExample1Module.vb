@@ -79,6 +79,10 @@ Imports Topomatic.Alg.Bridges
 Imports System.Security.Cryptography
 Imports NetTopologySuite.Geometries
 Imports NetTopologySuite.Algorithm.Hull
+Imports CadastralTools
+Imports CadastralTools.StructureElement
+Imports Microsoft.Office.Interop.Word
+
 Namespace RopExample1
     Partial Public Class RopExample1Module
         Inherits Topomatic.ApplicationPlatform.Plugins.PluginInitializator
@@ -313,55 +317,86 @@ Namespace RopExample1
             userControlPanelPropertiesObject.userCadView = cadWiever
             If cadWiever.SelectionSet.Count > 0 Then
                 For Each acEnt As Object In cadWiever.SelectionSet
-                    If TypeOf acEnt Is DwgObject Then
-                        Dim acObj As DwgObject = acEnt
-                        If Not (acObj.ObjectID Like userControlPanelPropertiesObject.ComboBox1.Tag) Then
-                            Dim arrayTablesPS As String() = Nothing
-                            Dim boolfindTables As Boolean = FuncXRecords.FuncReadTablesPS(acObj, arrayTablesPS)
-                            If IsArray(arrayTablesPS) = True Then
-                                For i As Integer = 0 To arrayTablesPS.Length - 1
-                                    Dim nameTablePs As String = arrayTablesPS(i)
-                                    If IsNothing(nameTablePs) = False Then
-                                        If nameTablePs.Trim.Length > 0 Then
-                                            Dim arrayData As String(,) = Nothing
-                                            Dim boolFindProperties As Boolean = FuncXRecords.FuncReadXData(acObj, nameTablePs, arrayData)
-                                            If IsArray(arrayData) = True Then
-                                                userControlPanelPropertiesObject.DataGridView1.Rows.Clear()
-                                                Dim countRow As Integer = 0
-                                                For j As Integer = 0 To arrayData.GetUpperBound(1)
-                                                    Dim nameF As String = arrayData(0, j)
-                                                    Dim valF As String = arrayData(1, j)
-                                                    If IsNothing(nameF) = False Then
-                                                        If nameF.Trim.Length > 0 Then
-                                                            If IsNothing(valF) = True Then valF = ""
-                                                            userControlPanelPropertiesObject.DataGridView1.Rows.Add()
-                                                            userControlPanelPropertiesObject.DataGridView1.Rows(countRow).Cells(0).Value = nameF
-                                                            userControlPanelPropertiesObject.DataGridView1.Rows(countRow).Cells(1).Value = valF
-                                                            countRow += 1
-                                                        End If
-                                                    End If
-                                                Next j
-                                            End If
+                    If TypeOf acEnt Is DwgEntity Then
+                        Dim acObj As DwgEntity = acEnt
+                        If Not (acObj.ObjectID Like userControlPanelPropertiesObject.ComboBox_DataTable.Tag) Then
+                            userControlPanelPropertiesObject.BeginPropertiesGridUpdate()
+                            Try
+                                userControlPanelPropertiesObject.selectDwgObject = Nothing
+                                userControlPanelPropertiesObject.dataStructureElement = Nothing
+                                userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows.Clear()
+                                userControlPanelPropertiesObject.ComboBox_DataTable.Tag = ""
+                                userControlPanelPropertiesObject.ComboBox_DataTable.DataSource = Nothing
+                                userControlPanelPropertiesObject.SetGlobalPropertiesMode()
+
+                                Dim arrayTablesPS As String() = Nothing
+                                Dim boolfindTables As Boolean = FuncXRecords.FuncReadTablesPS(acObj, arrayTablesPS)
+                                If IsArray(arrayTablesPS) = True Then
+                                    userControlPanelPropertiesObject.ComboBox_DataTable.DataSource = arrayTablesPS
+                                    userControlPanelPropertiesObject.ComboBox_DataTable.Tag = acObj.ObjectID
+
+                                    Dim projectStructuresIndex As Integer = -1
+                                    For comboIndex As Integer = 0 To userControlPanelPropertiesObject.ComboBox_DataTable.Items.Count - 1
+                                        Dim comboItem As Object = userControlPanelPropertiesObject.ComboBox_DataTable.Items(comboIndex)
+                                        If comboItem IsNot Nothing AndAlso String.Equals(comboItem.ToString(), StructureElement.tableXRecords.PROJECT_STRUCTURES.ToString(), StringComparison.OrdinalIgnoreCase) Then
+                                            projectStructuresIndex = comboIndex
+                                            Exit For
+                                        End If
+                                    Next comboIndex
+
+                                    If projectStructuresIndex > -1 Then
+                                        userControlPanelPropertiesObject.ComboBox_DataTable.SelectedIndex = projectStructuresIndex
+                                        Dim dataElement As StructureElement = New StructureElement
+                                        Dim boolFindProperties As Boolean = FuncXRecords.getXRecords(acObj, dataElement)
+                                        If boolFindProperties = True Then
+                                            userControlPanelPropertiesObject.selectDwgObject = acObj
+                                            userControlPanelPropertiesObject.dataStructureElement = dataElement
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows.Add(10)
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(0).Cells(0).Value = "LABEL"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(0).Cells(1).Value = dataElement.Label
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(1).Cells(0).Value = "NameClassObject"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(1).Cells(1).Value = dataElement.NameClassObject.ToString
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(2).Cells(0).Value = "TypeGeometry"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(2).Cells(1).Value = dataElement.TypeGeometry.ToString
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(3).Cells(0).Value = "NameTypeObject"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(3).Cells(1).Value = dataElement.NameTypeObject
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(4).Cells(0).Value = "Description"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(4).Cells(1).Value = dataElement.Description
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(5).Cells(0).Value = "KeyParameter"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(5).Cells(1).Value = dataElement.KeyParameter
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(6).Cells(0).Value = "IdStructure"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(6).Cells(1).Value = dataElement.IdStructure
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(7).Cells(0).Value = "IdElement"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(7).Cells(1).Value = dataElement.IdElement
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(8).Cells(0).Value = "Note"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(8).Cells(1).Value = dataElement.Note
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(9).Cells(0).Value = "IdObject"
+                                            userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows(9).Cells(1).Value = acObj.ObjectID.ToString
                                         End If
                                     End If
-                                Next i
-                            End If
-                            If IsArray(arrayTablesPS) = True Then
-                                userControlPanelPropertiesObject.ComboBox1.DataSource = arrayTablesPS
-                                userControlPanelPropertiesObject.ComboBox1.Tag = acObj.ObjectID
-                                Exit For
-                            End If
+                                End If
+                            Finally
+                                userControlPanelPropertiesObject.EndPropertiesGridUpdate()
+                            End Try
                         End If
                     End If
                     Exit For
                 Next
             Else
-                userControlPanelPropertiesObject.DataGridView1.Rows.Clear()
-                userControlPanelPropertiesObject.ComboBox1.Tag = ""
-                Dim arrayTemp As String() = Nothing
-                userControlPanelPropertiesObject.ComboBox1.DataSource = arrayTemp
+                userControlPanelPropertiesObject.BeginPropertiesGridUpdate()
+                Try
+                    userControlPanelPropertiesObject.selectDwgObject = Nothing
+                    userControlPanelPropertiesObject.dataStructureElement = Nothing
+                    userControlPanelPropertiesObject.DataGrid_PropertiesEnt.Rows.Clear()
+                    userControlPanelPropertiesObject.ComboBox_DataTable.Tag = ""
+                    userControlPanelPropertiesObject.ComboBox_DataTable.DataSource = Nothing
+                    userControlPanelPropertiesObject.SetGlobalPropertiesMode()
+                Finally
+                    userControlPanelPropertiesObject.EndPropertiesGridUpdate()
+                End Try
             End If
             Return userControlPanelPropertiesObject
+
         End Function
         '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
         'панель редактирования кадастровых данных
@@ -471,7 +506,7 @@ Line1:
                                 nameLayer = userCadEntity.Layer.Name
                                 nameLineType = userCadEntity.Linetype.Name
                                 Dim lineTypeUser As DwgLinetype = userCadEntity.Linetype
-                                userpattern = FuncStyles.FuncReturnPatternLineTypeCode(lineTypeUser)
+                                userpattern = StyleCadastralObject.FuncReturnPatternLineTypeCode(lineTypeUser)
                                 lineWidthUser = userCadEntity.Lineweight
                                 lineScaleUser = userCadEntity.LinetypeScale
                                 userColor = userCadEntity.Color.ColorIndex
@@ -584,12 +619,6 @@ Line1:
             'читаем масштаб аннотаций (текущий)
             Dim MDraw As Integer = userCadView.AnnotationScale
             'передаем масштаб чертежа в форму
-            Dim FormKPTImport As FormRosreestrKPTImport = New FormRosreestrKPTImport
-            'запускаем форму
-            FormKPTImport.ShowDialog()
-            If FormKPTImport.boolShow = False Then
-                Exit Sub
-            End If
             DrawLayer = DrawingLayer.GetDrawingLayer(userCadView)
             If IsNothing(DrawLayer) = True Then Return
             'получаем активный документ
@@ -600,2367 +629,328 @@ Line1:
             Dim generalDir As String = ""
             Dim templateXML As String = ""
             Dim templateDWG As String = ""
+            Dim categoryZn As String = "Земельный кадастр"
             Dim boolFindFileTemplate As Boolean = FuncFiles.FuncReadProperties(namePrograms, generalDir, templateXML, templateDWG)
-            '=========================================================================================================================
-            Dim activUserModel As String = FormKPTImport.ComboBox1.Text
-            Dim userProject As ModelProject = ApplicationHost.Current.ActiveProject
-            '// Получение всех моделей проекта
-            Dim childs As IProjectModel() = userProject.Model.GetChilds()
-            Dim userIProjectModel As IProjectModel = Nothing
-            For Each userIProjectModel In childs
-                Dim modelUri As URI = userIProjectModel.Uri
-                If modelUri.Extension Like ".arrx" Then
-                    Dim fileNameSfcx As String = Path.GetFileNameWithoutExtension(modelUri.LastPathComponent)
-                    If fileNameSfcx.Trim Like activUserModel.Trim Then
-                        ApplicationHost.Current.Plugins.Execute("activate", New Object() {userIProjectModel})
-                        Exit For
-                    End If
-                End If
-            Next
-            Dim DrawShowLayers As IEnumerable(Of DrawingLayer) = DrawingLayer.GetDrawingLayers(userCadView)
-            If IsNothing(activUserModel) = False Then
-                If activUserModel.Trim.Length > 0 Then
-                    For k1 As Integer = 0 To DrawShowLayers.Count - 1
-                        Dim TempDrawLayer As DrawingLayer = DrawShowLayers.ElementAt(k1)
-                        Dim nameUserFile As String = TempDrawLayer.Drawing.Filename
-                        nameUserFile = IO.Path.GetFileNameWithoutExtension(nameUserFile)
-                        If nameUserFile Like activUserModel Then
-                            DrawLayer = TempDrawLayer
-                            ActivDocument = DrawLayer.Drawing
-                            Exit For
-                        End If
-                    Next k1
-                End If
-            End If
-            userIProjectModel.LockWrite()
+            Dim FormCadastralImport As CadastralTools.FormImportKPT = New CadastralTools.FormImportKPT
             ActivDocument.BeginUpdate()
             Try
-
-
-
-
-            Finally
-                ActivDocument.EndUpdate()
-                userIProjectModel.UnlockWrite()
-            End Try
-        End Sub
-        '==============================================================================================================================
-        'Фильтрация КПТ
-        <cmd("FiltreKPT")>
-        Public Sub FiltreKPT()
-            'получаем активное окно
-            Dim userCadView As CadView = Me.CadView
-            If IsNothing(userCadView) Then Return
-            'получаем активный слой
-            Dim DrawLayer As DrawingLayer = DrawingLayer.GetDrawingLayer(userCadView)
-            If IsNothing(DrawLayer) = True Then Return
-            'получаем активный документ
-            Dim ActivDocument As Topomatic.Dwg.Drawing = DrawLayer.Drawing
-            If IsNothing(ActivDocument) = True Then Return
-            Dim userProject As ModelProject = ApplicationHost.Current.ActiveProject
-            'передаем масштаб чертежа в форму
-            Dim FormKPTImport As FormCreateCadastralPlan = New FormCreateCadastralPlan
-            'запускаем форму
-            FormKPTImport.ShowDialog()
-            If FormKPTImport.boolShow = False Then
-                Exit Sub
-            End If
-            Dim activUserModel As String = FormKPTImport.ComboBox1.Text
-            '1.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            Dim namePrograms As String = FuncFiles.namePrograms
-            Dim generalDir As String = ""
-            Dim templateXML As String = ""
-            Dim templateDWG As String = ""
-            Dim boolFindFileTemplate As Boolean = FuncFiles.FuncReadProperties(namePrograms, generalDir, templateXML, templateDWG)
-            '// Получение всех моделей проекта
-            Dim childs As IProjectModel() = userProject.Model.GetChilds()
-            Dim userIProjectModel As IProjectModel = Nothing
-            For Each userIProjectModel In childs
-                Dim modelUri As URI = userIProjectModel.Uri
-                If modelUri.Extension Like ".arrx" Then
-                    Dim fileNameSfcx As String = Path.GetFileNameWithoutExtension(modelUri.LastPathComponent)
-                    If fileNameSfcx.Trim Like activUserModel.Trim Then
-                        ApplicationHost.Current.Plugins.Execute("activate", New Object() {userIProjectModel})
-                        Exit For
-                    End If
+                'передаем масштаб чертежа в форму
+                Dim nameKvartal As String = ""
+                Dim tempPath As String = Path.GetTempPath()
+                tempPath = tempPath & "rosreestr"
+                FormCadastralImport.initDirectory = tempPath
+                'запускаем форму
+                FormCadastralImport.ShowDialog()
+                If FormCadastralImport.boolShow = False Then
+                    Exit Sub
                 End If
-            Next
-            Dim DrawShowLayers As IEnumerable(Of DrawingLayer) = DrawingLayer.GetDrawingLayers(userCadView)
-            If IsNothing(activUserModel) = False Then
-                If activUserModel.Trim.Length > 0 Then
-                    For k1 As Integer = 0 To DrawShowLayers.Count - 1
-                        Dim TempDrawLayer As DrawingLayer = DrawShowLayers.ElementAt(k1)
-                        Dim nameUserFile As String = TempDrawLayer.Drawing.Filename
-                        nameUserFile = IO.Path.GetFileNameWithoutExtension(nameUserFile)
-                        If nameUserFile Like activUserModel Then
-                            DrawLayer = TempDrawLayer
-                            ActivDocument = DrawLayer.Drawing
-                            Exit For
+                If FormCadastralImport.PutchTemlate.Trim.Length > 0 Then
+                    templateXML = FormCadastralImport.PutchTemlate
+                End If
+                If IsNothing(templateXML) = True Then
+                    MsgBox("Шаблон оформления не найден!!! Макро прервано.")
+                    Exit Sub
+                End If
+                If File.Exists(templateXML) = False Then
+                    MsgBox("Шаблон оформления не найден!!! Макро прервано.")
+                    Exit Sub
+                End If
+
+                Dim dictCadastralNumber As List(Of String) = New List(Of String) 'список кадастровый номеров для проверки дубликатов
+                If FormCadastralImport.boolImportXML = True Then
+                    If Directory.Exists(FormCadastralImport.initDirectory) = True Then
+                        Try
+                            tempPath = Path.Combine(FormCadastralImport.initDirectory, Guid.NewGuid().ToString())
+                            Directory.CreateDirectory(tempPath)
+                        Catch ex As Exception
+                            MsgBox("Не удалось создать папку для выходных данных.")
+                            Exit Sub
+                        End Try
+                    Else
+                        Exit Sub
+                    End If
+                    If FormCadastralImport.boolDubleObject = True Then
+                        dictCadastralNumber = CadastralFunction.getNumberCadastralObject(ActivDocument)
+                    End If
+                    Try
+                        If Directory.Exists(tempPath) = False Then
+                            Directory.CreateDirectory(tempPath)
                         End If
-                    Next k1
-                End If
-            End If
-
-            Dim acPlineBoundares As DwgPolyline = Nothing
-            userCadView.SelectionSet.Clear()
-            userCadView.SelectionSet.SelectObjectsAtScreen(Function(obj) TypeOf obj Is Object, "Выборите внешнюю границу: ")
-            For Each acZoneEnt As Object In userCadView.SelectionSet
-                If TypeOf acZoneEnt Is DwgPolyline Then
-                    acPlineBoundares = acZoneEnt
-                    Exit For
-                End If
-            Next
-            Dim classTopo As FuncTopologySuite = New FuncTopologySuite
-            Dim polygon1 = classTopo.CreatePolygon(acPlineBoundares)
-            '// копируем объекты
-            For Each userIProjectModel In childs
-                Dim modelUri As URI = userIProjectModel.Uri
-                If modelUri.Extension Like ".arrx" Then
-                    Dim pos As Integer = modelUri.AsAbsoluteUri.IndexOf("LandInventory")
-                    If pos > -1 Then
-                        Dim cadastralIDrawing As IDrawingContainer = userIProjectModel.LockRead()
-                        Dim cadastralDrawing As Dwg.Drawing = cadastralIDrawing.Drawing
-                        For Each acEnt As DwgEntity In cadastralDrawing.ActiveSpace.Entities
-                            If TypeOf (acEnt) Is DwgPolyline Then
-                                Dim poly As DwgPolyline = acEnt
-                                If poly.Closed = True Then
-                                    Dim polygon2 = classTopo.CreatePolygon(poly)
-                                    Dim boolI As Boolean = classTopo.DoPolygonsIntersect(polygon1, polygon2)
-                                    If boolI = True Then
-                                        Dim copyObject As DwgEntity = acEnt.Clone()
-                                        If ActivDocument.ActiveSpace.Entities.Contains(copyObject) = False Then
-                                            ActivDocument.ActiveSpace.Entities.Add(copyObject)
-                                        End If
-                                    End If
-                                Else
-                                    Dim polygon2 = classTopo.CreateLineString(poly)
-                                    Dim boolI As Boolean = classTopo.DoesLineIntersectPolygon(polygon2, polygon1)
-                                    If boolI = True Then
-                                        Dim copyObject As DwgEntity = acEnt.Clone()
-                                        If ActivDocument.ActiveSpace.Entities.Contains(copyObject) = False Then
-                                            ActivDocument.ActiveSpace.Entities.Add(copyObject)
-                                        End If
-                                    End If
-                                End If
-                            End If
-                        Next
-                    End If
-                End If
-            Next
-        End Sub
-        '==============================================================================================================================
-        'Импорт КПТ
-        <cmd("RosreestrImportKPT2")>
-        Public Sub RosreestrImportKPT2()
-            'получаем активное окно
-            Dim userCadView As CadView = Me.CadView
-            If IsNothing(userCadView) Then Return
-            'получаем активный слой
-            Dim DrawLayer As DrawingLayer = DrawingLayer.GetDrawingLayer(userCadView)
-            If IsNothing(DrawLayer) = True Then Return
-            'получаем активный документ
-            Dim ActivDocument As Topomatic.Dwg.Drawing = DrawLayer.Drawing
-            If IsNothing(ActivDocument) = True Then Return
-            Dim rng As Random = New Random()
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'читаем масштаб аннотаций (текущий)
-            Dim MDraw As Integer = userCadView.AnnotationScale
-            'передаем масштаб чертежа в форму
-            Dim FormKPTImport As FormRosreestrKPTImport = New FormRosreestrKPTImport
-            'запускаем форму
-            FormKPTImport.ShowDialog()
-            If FormKPTImport.boolShow = False Then
-                Exit Sub
-            End If
-            '1.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            Dim namePrograms As String = FuncFiles.namePrograms
-            Dim generalDir As String = ""
-            Dim templateXML As String = ""
-            Dim templateDWG As String = ""
-            Dim boolFindFileTemplate As Boolean = FuncFiles.FuncReadProperties(namePrograms, generalDir, templateXML, templateDWG)
-            '=========================================================================================================================
-            Dim activUserModel As String = FormKPTImport.ComboBox1.Text
-            Dim userProject As ModelProject = ApplicationHost.Current.ActiveProject
-            '// Получение всех моделей проекта
-            Dim childs As IProjectModel() = userProject.Model.GetChilds()
-            For Each child As IProjectModel In childs
-                Dim modelUri As URI = child.Uri
-                If modelUri.Extension Like ".arrx" Then
-                    Dim fileNameSfcx As String = Path.GetFileNameWithoutExtension(modelUri.LastPathComponent)
-                    If fileNameSfcx.Trim Like activUserModel.Trim Then
-                        ApplicationHost.Current.Plugins.Execute("activate", New Object() {child})
-                        Exit For
-                    End If
-                End If
-            Next
-            Dim DrawShowLayers As IEnumerable(Of DrawingLayer) = DrawingLayer.GetDrawingLayers(userCadView)
-            If IsNothing(activUserModel) = False Then
-                If activUserModel.Trim.Length > 0 Then
-                    For k1 As Integer = 0 To DrawShowLayers.Count - 1
-                        Dim TempDrawLayer As DrawingLayer = DrawShowLayers.ElementAt(k1)
-                        Dim nameUserFile As String = TempDrawLayer.Drawing.Filename
-                        nameUserFile = IO.Path.GetFileNameWithoutExtension(nameUserFile)
-                        If nameUserFile Like activUserModel Then
-                            DrawLayer = TempDrawLayer
-                            ActivDocument = DrawLayer.Drawing
-                            Exit For
+                        If Directory.Exists(tempPath) = True Then
+                            CadastralTools.ImportKPT.RosreestrImportKPT(tempPath, nameKvartal)
                         End If
-                    Next k1
+                    Catch ex As System.Exception
+                    End Try
+                Else
+                    tempPath = FormCadastralImport.initDirectory
                 End If
-            End If
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            '============================================================================================
-            'начальные данные для считывания файла xml
-            '============================================================================================
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            Dim ObjectCollections As String(,) = Nothing
-            Dim CountObjectCollection As Integer = 0
-            Dim boolKvartal As Boolean = False 'обрабатывается квартал
-            Dim boolspatial_data As Boolean = False
-            Dim boolBuild As Boolean = False 'обрабатывается здание
-            Dim boolParcel As Boolean = False 'обрабатывается участок
-            Dim boolPart As Boolean = False 'обрабатываеся часть участка, здания, сооружения
-            Dim boolCounter As Boolean = False 'обрабатывается контур участка
-            Dim boolconstruction As Boolean = False 'обрабатывается сооружение
-            Dim boolunderconstruction As Boolean = False 'обрабатывается объект незавершенного строительства
-            Dim boolboundary As Boolean = False 'обрабатывается граница
-            Dim boolcityboundary As Boolean = False 'обрабатывается граница города
-            Dim boolzone As Boolean = False 'обрабатывается зона
-            Dim boolcoastline As Boolean = False 'береговая полоса
-            Dim boolNastr As Boolean = False 'флаг Говорит о том что нужно ли проверять настройки (слой, цвет и т.п.)
-            '============================================================================================
-            Dim boolNumberSubParcel As Boolean = False
-            Dim boolSpatialElements As Boolean = False
-            Dim boolCode As Boolean = False
-            Dim boolType As Boolean = False
-            Dim boolval As Boolean = False
-            Dim boolcomdata As Boolean = False
-            Dim boolunit As Boolean = False
-            'начальное значение номера точки
-            Dim Numb As Integer = 1 'номер
-            Dim NXYZ As String(,) = Nothing 'массив для хранения координат объектов
-            Dim boolX As Boolean = False
-            Dim X As String = ""
-            Dim boolY As Boolean = False
-            Dim Y As String = ""
-            Dim boolOrgNumb As Boolean = False
-            Dim OrgNumb As String = "" 'номер
-            Dim boolnum_geopoint As Boolean = False
-            Dim num_geopoint As String = ""
-            Dim boolGeopoint_opred As Boolean = False
-            Dim Geopoint_opred As String = ""
-            Dim boolDelta As Boolean = False
-            Dim Delta As String = "0" 'погрешность
-            Dim boolgeopoint_zacrep As Boolean = False
-            Dim geopoint_zacrep As String = "-" 'закрепление
-            Dim boolR As Boolean = False
-            Dim r As String = "" 'радиус окружности
-            Dim boolGeopointValue As Boolean = False
-            Dim GeopointValue As String = ""
-            Dim ArrayCounterParcel As String(,) = Nothing
-            Dim CountArrayCounterParcel As Integer = 0
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'тип объекта
-            '0-кадастровый квартал
-            Dim boolarea_quarter As Boolean = False
-            Dim Area_quarter As String = ""
-            Dim CadastralBlock As String = "-"
-            Dim boolKvartalNumber As Boolean = False
-            '1. Общие данные для участков, ОКС и сооружений
-            Dim boolCadNumber As Boolean = False 'кадастровый номер объекта
-            Dim Cad_Number As String = "" 'полный кадастровый номер объекта
-            Dim Cad_Number_Note As String = "" 'для единого землепользования
-            Dim Cad_Number_Short As String = "" 'краткий кадастровый номер
-            Dim CodTypeObject As String = "" 'код объекта (Земельный участок, сооружение, и т.п.)
-            Dim ValTypeObject As String = "" 'значение объекта
-            'общие для участков и зданий (участки-разрешенное использование, знания - тип здания (жилое, нежилое)
-            Dim boolpermitted_use As Boolean = False 'разрешенное использование
-            '1. Земельные участки
-            Dim StateSubParcel As String = "" 'тип подучастка 01-ранее учтенный 06-учтенный ....
-            Dim NumParcel As String = "" 'краткий кадастровый номер
-            Dim boolNumberContour As Boolean = False
-            Dim NumberContour As String = "" 'номер контура
-            Dim NumberSubParcel As String = "" 'номер части
-            Dim boolcommon_land_cad_number As Boolean = False
-            Dim common_land_cad_number As String = ""
-            'тип участка
-            Dim boolSubTypeParcel As Boolean = False
-            Dim SubTypeParcel As String = "" 'тип подучастка землепользование, многоконтурный участок и т.п
-            'вид участка
-            Dim StateParcel As String = "06" '06-учтенный
-            Dim boolStateParcel As Boolean = False
-            'категория земель
-            Dim boolCategory As Boolean = False
-            Dim Category As String = ""
-            Dim CodCategory As String = ""
-            'разрешенное использование 
-            Dim boolRazrIsp As Boolean = False
-            Dim byRazrIspByDoc As Boolean = False
-            Dim RazrIsp As String = ""
-            Dim RazrIspByDoc As String = ""
-            'адрес
-            '===============================================================
-            Dim boolAdresParcel As Boolean = False
-            Dim AddresParcel As String = ""
-            Dim boolokato As Boolean = False
-            Dim okato As String = ""
-            Dim boolkladr As Boolean = False
-            Dim kladr As String = ""
-            Dim boolpostcode As Boolean = False
-            Dim postcode As String = ""
-            Dim boolregion As Boolean = False
-            Dim region As String = ""
-            Dim boolDistrict As Boolean = False
-            Dim booltypeDistrict As Boolean = False
-            Dim typeDistrict As String = ""
-            Dim boolnameDistrict As Boolean = False
-            Dim nameDistrict As String = ""
-            Dim boolLocality As Boolean = False
-            Dim booltypeLocality As Boolean = False
-            Dim typeLocality As String = ""
-            Dim boolnameLocality As Boolean = False
-            Dim nameLocalyty As String = ""
-            Dim boolStreet As Boolean = False
-            Dim booltypeStreet As Boolean = False
-            Dim type_street As String = ""
-            Dim boolnameStreet As Boolean = False
-            Dim name_street As String = ""
-            Dim boolLevel1 As Boolean = False
-            Dim booltypeLevel1 As Boolean = False
-            Dim typeLevel1 As String = ""
-            Dim boolnameLevel1 As Boolean = False
-            Dim nameLevel1 As String = ""
-            Dim boolLevel2 As Boolean = False
-            Dim booltypeLevel2 As Boolean = False
-            Dim typeLevel2 As String = ""
-            Dim boolnameLevel2 As Boolean = False
-            Dim nameLevel2 As String = ""
-            Dim boolLevel3 As Boolean = False
-            Dim booltypeLevel3 As Boolean = False
-            Dim typeLevel3 As String = ""
-            Dim boolnameLevel3 As Boolean = False
-            Dim nameLevel3 As String = ""
-            Dim readable_address As String = ""
-            Dim boolreadable_address As Boolean = False
-            '====================================================================
-            'здания
-            Dim boolpurpose As Boolean = False 'тип здания жилое нежилое
-            Dim purpose_build As String = ""
-            Dim boolposition_description As Boolean = False 'описание местоположения
-            Dim pos_description_build As String = ""
-            Dim codeBuild As String = "" 'назначение код здания
-            Dim permitted_use As String = ""
-            Dim boolname As Boolean = False
-            Dim Assignatuin As String = ""
-            Dim MaterialWall As String = ""
-            Dim CountFloat As String = ""
-            '============================================================================
-            'сооружения
-            Dim purpose_construction As String = ""
-            Dim boolparams As Boolean = False 'параметры сооружения
-            Dim boolbase_parameter As Boolean = False
-            Dim booldepth As Boolean = False 'глубина залегания
-            Dim baseParameters As String = ""
-            Dim depth As String = ""
-            Dim boolextension As Boolean = False 'длина
-            Dim extension As String = ""
-            Dim boolvolume As Boolean = False
-            Dim volume As String = ""
-            Dim boolbuilt_up_area As Boolean = False
-            Dim boolareaConstr As Boolean = False
-            '============================================================================
-            'границы и зоны
-            Dim booltype_boundary As Boolean = False
-            Dim type_boundary As String = ""
-            Dim boolregistration_date As Boolean = False
-            Dim registr_data As String = ""
-            Dim boolRegNumbZone As Boolean = False 'номер территориальной зоны
-            Dim RegNumbZone As String = "" 'номер зоны
-            Dim boolType_zone As Boolean = False
-            Dim cod_boundary As String = ""
-            Dim type_zona As String = ""
-            Dim code_zona As String = ""
-            Dim boolNumberZona As Boolean = False
-            Dim boolIndexZona As Boolean = False
-            Dim NumberZona As String = ""
-            Dim IndexZona As String = ""
-            '====================================================================================
-            'береговые линии
-            Dim boolwater_object_type As Boolean = False
-            Dim boolwater_object_name As Boolean = False
-            Dim water_object_name As String = ""
-            Dim codwater_object_type As String = ""
-            Dim typewater_object_type As String = ""
-            '====================================================================================
-            'собственник
-            Dim boolRightType As Boolean = False
-            Dim RightType As String = ""
-            Dim boolOwner As Boolean = False
-            Dim boolOwnerName As Boolean = False
-            Dim ownerName As String = ""
-            Dim boolresident As Boolean = False
-            Dim encumbranceName As String = ""
-            Dim boolrecord_info As Boolean = False
-            Dim boolRightName As Boolean = False
+                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                Dim files As String() = Directory.GetFiles(tempPath)
+                If files.Length = 0 Then
+                    MsgBox("Не удалось корректно прочитать XML. Макро прервано.")
+                    Exit Sub
+                End If
+                Dim cadastralToolsNetTopoSuit As CadastralTools.FuncNetTopologySuite = New CadastralTools.FuncNetTopologySuite
+                Dim roburNetTopoSuit As FuncTopologySuite = New FuncTopologySuite
+                Dim drawObject As CreateDWGObject = New CreateDWGObject
+                'библиотека стилей отображения
 
-            '===============================================================================
-            'реквизиты выписки
-            Dim booldate_formation As Boolean = False
-            Dim dataVP As String = "-"
-            Dim boolregistration_number As Boolean = False
-            Dim NumberVP As String = ""
-            Dim boolgroup_top_requisites As Boolean = False
-            '========================================================
-            'площадь участка общая
-            Dim boolGlobalArea As Boolean = False
-            Dim GlobalArea As String = ""
-            Dim deltaArea As String = ""
-            Dim booldeltaArea As Boolean = False
-            'кадастровая стоимость
-            Dim boolCostParcel As Boolean = False
-            Dim CostParcel As String = ""
-            'Счетчик вершин контура (для массива координат)
-            Dim countcoord As Integer = -1
-            Dim TypeLineSubParcel As String = ""
-            Dim LocalID As Integer = 0
-            Dim GlobalID As Integer = 0
-            '=======================================================================================================
-            'переменные для оформления контуров
-            Dim LayerObject As String = "0"
-            Dim LineTypeObj As String = "Continuous"
-            Dim IndexColorObj As Integer = 256
-            Dim WidthrObj As Integer = 20
-            Dim ScLine As Double = 1
-            Dim GlobalContLine As Double = 0
-            Dim NamePSSetTable As String = "OBJECT"
-            Dim IDPSTAble As ObjectId = Nothing
-            Dim OldCodObject As String = ""
-            '========================================================================================================
-            'массив с кадастровыми номерами всех кадастровых объектов
-            Dim ArrayOldCadastrNumbers As String() = Nothing
-            Dim CountArrayOldCadastrNumbers As Integer = 0
-            Dim ArrayOldCadastrRegNumbers As String() = Nothing
-            Dim CountArrayOldRegNumbers As Integer = 0
-            Dim ArrayOldCadastrKVNumbers As String() = Nothing
-            Dim CountArrayOldKVNumbers As Integer = 0
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'тело программы
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'выбор файла
-            Dim LineErrNumber As Integer = 0
-            Dim filterFile As String = "xml files (*.xml)|*.xml"
-            Dim FileRez As String = FuncFiles.FuncGetAbsoluteFilePathName("Открыть файл xml", filterFile)
-            If FileRez.Trim.Length = 0 Then Exit Sub
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'читаем файл xml
-            If File.Exists(FileRez) = True Then
-                Dim reader As XmlTextReader = New XmlTextReader(FileRez)
-                Dim countFile As Integer = 0
-                While reader.Read()
-                    Dim NameBlock As String = reader.Name 'читаем ветку
-                    LineErrNumber = reader.LineNumber
-                    Select Case reader.NodeType
-                        Case XmlNodeType.Element
-                            'блок общих данных
-                            '=====================================================================
-                            If NameBlock Like "common_data" Then
-                                boolcomdata = True
-                            ElseIf NameBlock Like "type" Then
-                                boolType = True
-                            ElseIf NameBlock Like "code" Then
-                                boolCode = True
-                            ElseIf NameBlock Like "value" Then
-                                boolval = True
-                            ElseIf NameBlock Like "unit" Then
-                                boolunit = True
-                            ElseIf NameBlock Like "name" Then
-                                boolname = True
-                                '============================================================================
-                                'кадастровый квартал
-                            ElseIf NameBlock Like "area_quarter" Then
-                                boolarea_quarter = True 'площадь квартала
-                            ElseIf NameBlock Like "cadastral_number" Then
-                                boolKvartalNumber = True 'кадастровый номер квартала (КПТ)
-                            ElseIf NameBlock Like "quarter_cad_number" Then
-                                boolKvartalNumber = True 'кадастровый номер квартала (выписка)
-                                '============================================================================
-                                'часть участка и контур участка
-                            ElseIf NameBlock Like "object_part" Then
-                                boolPart = True 'часть кадастрового участка
-                                NumberSubParcel = ""
-                            ElseIf NameBlock Like "object_parts" Then
-                                boolNastr = False 'сбрасываем настройки
-                            ElseIf NameBlock Like "contours" Then
-                                'CountCounter = 0
-                            ElseIf NameBlock Like "contour" Then
-                                'контур объекта
-                                boolCounter = True
-                                NumberContour = ""
-                            ElseIf NameBlock Like "State" Then
-                                boolStateParcel = True
-                                '=========================================================
-                                'адрес
-                            ElseIf NameBlock Like "address" Then
-                                boolAdresParcel = True
-                            ElseIf NameBlock Like "okato" Then
-                                boolokato = True
-                            ElseIf NameBlock Like "kladr" Then
-                                boolkladr = True
-                            ElseIf NameBlock Like "postal_code" Then
-                                boolpostcode = True
-                            ElseIf NameBlock Like "region" Then
-                                boolregion = True
-                            ElseIf NameBlock Like "type_district" Then
-                                booltypeDistrict = True
-                            ElseIf NameBlock Like "name_district" Then
-                                boolnameDistrict = True
-                            ElseIf NameBlock Like "type_locality" Then
-                                booltypeLocality = True
-                            ElseIf NameBlock Like "name_locality" Then
-                                boolnameLocality = True
-                            ElseIf NameBlock Like "type_street" Then
-                                booltypeStreet = True
-                            ElseIf NameBlock Like "name_street" Then
-                                boolnameStreet = True
-                            ElseIf NameBlock Like "type_level1" Then
-                                booltypeLevel1 = True
-                            ElseIf NameBlock Like "name_level1" Then
-                                boolnameLevel1 = True
-                            ElseIf NameBlock Like "type_level2" Then
-                                booltypeLevel2 = True
-                            ElseIf NameBlock Like "name_level2" Then
-                                boolnameLevel2 = True
-                            ElseIf NameBlock Like "type_level3" Then
-                                booltypeLevel3 = True
-                            ElseIf NameBlock Like "name_level3" Then
-                                boolnameLevel3 = True
-                            ElseIf NameBlock Like "readable_address" Then
-                                boolreadable_address = True 'неструктурированный адрес
-                            ElseIf NameBlock Like "position_description" Then
-                                boolposition_description = True 'описание местоположения
-                                '===============================================================================
-                                'кадастровые номера и обозначения зон
-                            ElseIf NameBlock Like "cad_number" Then
-                                boolCadNumber = True 'кадастровый номер участка здания стоения ОНС
-                            ElseIf NameBlock Like "part_number" Then
-                                boolNumberSubParcel = True 'номер части участка
-                            ElseIf NameBlock Like "number_pp" Then
-                                boolNumberContour = True 'номер контура
-                                LocalID = rng.Next
-                                If GlobalID < 1 Then
-                                    GlobalID = rng.Next
-                                End If
-                            ElseIf NameBlock Like "reg_numb_border" Then
-                                boolRegNumbZone = True 'обозначение границы и ЗОУИТ
-                            ElseIf NameBlock Like "common_land_cad_number" Then
-                                boolcommon_land_cad_number = True
-                                '=================================================================================
-                                'площади
-                            ElseIf NameBlock Like "area" And boolbase_parameter = False Then
-                                boolGlobalArea = True 'площадь объекта
-                            ElseIf NameBlock Like "inaccuracy" Then
-                                booldeltaArea = True 'погрешность определения площади
-                                '====================================================================================
-                                'кадастровая стоимость
-                            ElseIf NameBlock Like "cost" Then
-                                boolCostParcel = True
-                                '====================================================================================
-                                'тип участка
-                            ElseIf NameBlock Like "subtype" Then
-                                boolSubTypeParcel = True 'землепользование, обособленный участок и т.п.
-                            ElseIf NameBlock Like "category" Then
-                                boolCategory = True 'категория земель
-                            ElseIf NameBlock Like "permitted_use" Then
-                                boolpermitted_use = True
-                            ElseIf NameBlock Like "by_document" Then
-                                byRazrIspByDoc = True 'разрешенное использование по документу
-                                '=======================================
-                                'здания, сооружения (характеристики)
-                            ElseIf NameBlock Like "purpose" Then
-                                boolpurpose = True 'жилое нежилое многоквартирный дом
-                            ElseIf NameBlock Like "permitted_use" Then
-                                boolpermitted_use = True 'разрешенное использование, для здания - жилое, нежилое
-                                '==============================================
-                                'характеристики строения
-                            ElseIf NameBlock Like "params" Then
-                                boolparams = True 'блок параметров
-                            ElseIf NameBlock Like "base_parameter" Then
-                                boolbase_parameter = True 'блок с базовыми параметрами
-                            ElseIf NameBlock Like "occurence_depth" Then
-                                booldepth = True 'глубина
-                            ElseIf NameBlock Like "depth" Then
-                                booldepth = True 'тоже глубина
-                            ElseIf NameBlock Like "extension" Then
-                                boolextension = True 'протяженность
-                            ElseIf NameBlock Like "volume" Then
-                                boolvolume = True 'объем
-                            ElseIf NameBlock Like "area" And boolbase_parameter = True Then
-                                boolareaConstr = True 'площадь
-                            ElseIf NameBlock Like "built_up_area" And boolbase_parameter = True Then
-                                boolbuilt_up_area = True 'площадь
-                                '=======================================================
-                                'территориальные зоны границы
-                            ElseIf NameBlock Like "record_info" Then
-                                boolrecord_info = True
-                            ElseIf NameBlock Like "type_boundary" Then
-                                booltype_boundary = True 'тип границы
-                            ElseIf NameBlock Like "type_zone" Then
-                                boolType_zone = True 'описание зоны
-                            ElseIf NameBlock Like "registration_date" Then
-                                boolregistration_date = True 'дата регистрации зоны
-                            ElseIf NameBlock Like "reg_numb_border" Then
-                                boolRegNumbZone = True 'номер зоны
-                            ElseIf NameBlock Like "number" And boolzone = True Then
-                                boolNumberZona = True 'номер зоны
-                            ElseIf NameBlock Like "index" And boolzone = True Then
-                                boolIndexZona = True 'номер зоны
-                                '=======================================================
-                                'береговые полосы
-                            ElseIf NameBlock Like "water_object_type" Then
-                                boolwater_object_type = True
-                            ElseIf NameBlock Like "water_object_name" Then
-                                boolwater_object_name = True
-                                '=====================================================================
-                                'сведения о правах
-                            ElseIf NameBlock Like "right_type" Then
-                                boolRightType = True 'тип собственности
-                            ElseIf NameBlock Like "right_holder" Then
-                                boolOwner = True 'тип собственности
-                            ElseIf NameBlock Like "name" And boolOwner = True Then
-                                boolOwnerName = True 'тип собственности
-                            ElseIf NameBlock Like "resident" Then
-                                boolresident = True 'арендатор
-                                '=====================================================================
-                                'реквизиты выписки
-                            ElseIf NameBlock Like "group_top_requisites" Then
-                                boolgroup_top_requisites = True 'блок с реквизитами
-                            ElseIf NameBlock Like "date_formation" Then
-                                booldate_formation = True
-                            ElseIf NameBlock Like "registration_number" Then
-                                boolregistration_number = True
-                                '=============================================================
-                                'координаты
-                            ElseIf NameBlock Like "ordinate" Then
-                                countcoord += 1
-                                ReDim Preserve NXYZ(8, countcoord) 'тип,номер, x,y,delta,desk,r
-                                NXYZ(0, countcoord) = "Точка"
-                            ElseIf NameBlock Like "x" Then
-                                boolX = True
-                            ElseIf NameBlock Like "y" Then
-                                boolY = True
-                            ElseIf NameBlock Like "geopoint_opred" Then
-                                boolGeopoint_opred = True
-                            ElseIf NameBlock Like "ord_nmb" Then
-                                boolOrgNumb = True
-                            ElseIf NameBlock Like "num_geopoint" Then
-                                boolnum_geopoint = True
-                            ElseIf NameBlock Like "delta_geopoint" Then
-                                boolDelta = True
-                            ElseIf NameBlock Like "r" Then
-                                boolR = True
-                                '==========================================================================
-                                'блоки с объектами
-                            ElseIf NameBlock Like "land_record" Then 'земельный участок
-                                AddresParcel = ""
-                                Cad_Number = ""
-                                StateParcel = ""
-                                Category = ""
-                                CodCategory = ""
-                                RazrIsp = ""
-                                RazrIspByDoc = ""
-                                CostParcel = ""
-                                GlobalArea = ""
-                                Cad_Number_Note = ""
-                                deltaArea = ""
-                                RightType = ""
-                                encumbranceName = ""
-                                ownerName = ""
-                                okato = ""
-                                Cad_Number_Short = ""
-                                boolParcel = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "build_record" Then 'здание
-                                Cad_Number = ""
-                                AddresParcel = ""
-                                okato = ""
-                                RightType = ""
-                                encumbranceName = ""
-                                ownerName = ""
-                                CostParcel = ""
-                                GlobalArea = ""
-                                Cad_Number_Note = ""
-                                purpose_build = ""
-                                pos_description_build = ""
-                                Assignatuin = ""
-                                MaterialWall = ""
-                                CountFloat = ""
-                                StateParcel = ""
-                                boolBuild = True
-                                purpose_build = ""
-                                Cad_Number_Short = ""
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "construction_record" Then 'конструкция
-                                Cad_Number = ""
-                                AddresParcel = ""
-                                CostParcel = ""
-                                GlobalArea = ""
-                                Cad_Number_Note = ""
-                                baseParameters = ""
-                                purpose_construction = ""
-                                Cad_Number_Short = ""
-                                boolconstruction = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "object_under_construction_record" Then 'объект незавершенного строительсва
-                                Cad_Number = ""
-                                AddresParcel = ""
-                                okato = ""
-                                RightType = ""
-                                encumbranceName = ""
-                                ownerName = ""
-                                CostParcel = ""
-                                GlobalArea = ""
-                                Cad_Number_Note = ""
-                                purpose_build = ""
-                                pos_description_build = ""
-                                Assignatuin = ""
-                                MaterialWall = ""
-                                CountFloat = ""
-                                StateParcel = ""
-                                Cad_Number_Short = ""
-                                boolunderconstruction = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "inhabited_locality_boundary_record" Then 'граница населенного пункта
-                                RegNumbZone = ""
-                                type_boundary = ""
-                                cod_boundary = ""
-                                registr_data = ""
-                                boolcityboundary = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "municipal_boundary_record" Then 'граница административная
-                                RegNumbZone = ""
-                                type_boundary = ""
-                                cod_boundary = ""
-                                registr_data = ""
-                                boolboundary = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "spatial_data" Then 'квартал
-                                boolspatial_data = True
-                                boolKvartal = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "zones_and_territories_record" Then 'охранная зона
-                                type_zona = ""
-                                RegNumbZone = ""
-                                code_zona = ""
-                                registr_data = ""
-                                boolzone = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "coastline_record" Then 'береговая линия
-                                type_zona = ""
-                                RegNumbZone = ""
-                                code_zona = ""
-                                registr_data = ""
-                                ValTypeObject = ""
-                                water_object_name = ""
-                                codwater_object_type = ""
-                                typewater_object_type = ""
-                                type_boundary = ""
-                                boolcoastline = True
-                                LocalID = rng.Next
-                                GlobalID = 0
-                                Erase ObjectCollections
-                                CountObjectCollection = 0
-                            ElseIf NameBlock Like "land_records" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "build_records" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "construction_records" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "object_under_construction_records" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "municipal_boundaries" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "inhabited_locality_boundaries" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                cod_boundary = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "zones_and_territories_boundaries" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                ValTypeObject = ""
-                                code_zona = ""
-                                cod_boundary = ""
-                                IndexZona = ""
-                                NumberZona = ""
-                                boolNastr = False
-                            ElseIf NameBlock Like "coastline_boundaries" Then
-                                LayerObject = "0"
-                                LineTypeObj = "Continuous"
-                                IndexColorObj = 256
-                                WidthrObj = 20
-                                ScLine = 1
-                                GlobalContLine = 0
-                                NamePSSetTable = "OBJECT"
-                                boolNastr = False
+                Dim dictonaryStyle As Dictionary(Of String, StyleCadastralObject) = New Dictionary(Of String, StyleCadastralObject)
+                '===============================================================================================================================================================
+                'выбираем внешнюю границу для отсечки лишних объектов
+                Dim boundPolygon As NetTopologySuite.Geometries.Polygon = Nothing
+                If FormCadastralImport.boolSelectBound = True Then
+                    'сброс выделения
+                    userCadView.SelectionSet.Clear()
+                    userCadView.SelectionSet.SelectOneObjectAtScreen(Function(obj) TypeOf obj Is DwgPolyline, "Выберите внешнюю границу: ")
+                    For Each acEnt As Object In userCadView.SelectionSet
+                        If TypeOf acEnt Is DwgPolyline Then
+                            Dim boundPoly As DwgPolyline = acEnt
+                            If boundPoly.Area > 0 Then
+                                boundPolygon = roburNetTopoSuit.CreatePolygonByPolyline(boundPoly)
                             End If
-                           '==========================================================================================
-                           'значения
-                           '==========================================================================================
-                        Case XmlNodeType.Text
-                            'кадастровый квартал
-                            If boolKvartalNumber = True Then
-                                CadastralBlock = reader.Value 'номер кадастрового квартала
-                                boolKvartalNumber = False
-                            ElseIf boolarea_quarter = True And boolGlobalArea = True Then
-                                'площадь квартала
-                                Area_quarter = reader.Value
-                            ElseIf boolarea_quarter = True And boolunit = True Then
-                                'еденицы идмерения площади квартала
-                                Dim unit As Integer = CInt(reader.Value)
-                                Area_quarter = Area_quarter & " " & CadastralFunction.FuncFindCadastrUnitByCode(unit)
-                            ElseIf boolcomdata = True And boolType = True Then
-                                CodTypeObject = reader.Value
-                                boolType = False
-                            ElseIf boolcomdata = True And boolval = True Then
-                                ValTypeObject = reader.Value
-                                boolval = False
-                            ElseIf boolCadNumber = True And boolcomdata = True Then
-                                'кадастровый номер участка, сооружения, здания
-                                Cad_Number = reader.Value
-                                boolCadNumber = False
-                                'отделяем краткий номер
-                                Dim posN As Integer = Cad_Number.LastIndexOf(":")
-                                If posN > 6 Then
-                                    Cad_Number_Short = Mid(Cad_Number, posN + 1)
-                                End If
-                            ElseIf boolcommon_land_cad_number = True And boolCadNumber = True Then
-                                'кадастровый номер участка, сооружения, здания
-                                Cad_Number_Note = reader.Value
-                                boolCadNumber = False
-                            ElseIf boolNumberSubParcel = True Then
-                                'номер части учаcтка
-                                NumberSubParcel = reader.Value
-                                boolNumberSubParcel = False
-                            ElseIf boolNumberContour = True Then
-                                'номер контура
-                                NumberContour = reader.Value
-                                boolNumberContour = False
-                            ElseIf boolRegNumbZone = True Then
-                                'номер территориальной зоны
-                                RegNumbZone = reader.Value
-                                boolRegNumbZone = False
-                            ElseIf boolSubTypeParcel = True And boolval = True Then
-                                'тип участка 01-землепользование, многоконтурный и т.п.
-                                SubTypeParcel = reader.Value
-                                If SubTypeParcel Like "Многоконтурный участок" Or SubTypeParcel Like "Единое землепользование" Then
-                                    GlobalID = rng.Next
-                                End If
-                            ElseIf boolStateParcel = True And boolCode = True Then
-                                StateParcel = reader.Value
-                            ElseIf boolCategory = True And boolCode = True Then
-                                'категория земель
-                                CodCategory = reader.Value
-                            ElseIf boolCategory = True And boolval = True Then
-                                Category = reader.Value
-                            ElseIf boolpermitted_use = True And byRazrIspByDoc = True Then
-                                RazrIspByDoc = reader.Value
-                                byRazrIspByDoc = False
-                            ElseIf boolCostParcel = True And boolval = True Then
-                                'кадастровая стоимость
-                                CostParcel = reader.Value
-                                boolCostParcel = False
-                            ElseIf boolGlobalArea = True And boolval = True Then
-                                'площадь участка
-                                GlobalArea = reader.Value
-                                boolval = False
-                            ElseIf boolparams = True And boolGlobalArea = True And boolParcel = False Then
-                                'площадь здания
-                                GlobalArea = reader.Value
-                                boolGlobalArea = False
-                            ElseIf boolGlobalArea = True And booldeltaArea = True Then
-                                deltaArea = reader.Value
-                                booldeltaArea = False
-                                '========================================================================
-                                'адрес
-                            ElseIf boolAdresParcel = True And boolokato = True Then
-                                okato = reader.Value
-                                boolokato = False
-                            ElseIf boolAdresParcel = True And boolkladr = True Then
-                                kladr = reader.Value
-                                boolkladr = False
-                            ElseIf boolAdresParcel = True And boolpostcode = True Then
-                                postcode = reader.Value
-                                boolpostcode = False
-                            ElseIf boolAdresParcel = True And boolregion = True And boolval = True Then
-                                region = reader.Value
-                                boolregion = False
-                                boolval = False
-                            ElseIf boolAdresParcel = True And booltypeDistrict = True Then
-                                typeDistrict = reader.Value
-                                booltypeDistrict = False
-                            ElseIf boolAdresParcel = True And boolnameDistrict = True Then
-                                nameDistrict = reader.Value
-                                boolnameDistrict = False
-                            ElseIf boolAdresParcel = True And booltypeLocality = True Then
-                                typeLocality = reader.Value
-                                booltypeLocality = False
-                            ElseIf boolAdresParcel = True And boolnameLocality = True Then
-                                nameLocalyty = reader.Value
-                                boolnameLocality = False
-                            ElseIf boolAdresParcel = True And booltypeStreet = True Then
-                                type_street = reader.Value
-                                booltypeStreet = False
-                            ElseIf boolAdresParcel = True And boolnameStreet = True Then
-                                name_street = reader.Value
-                                boolnameStreet = False
-                            ElseIf boolAdresParcel = True And booltypeLevel1 = True Then
-                                typeLevel1 = reader.Value
-                                booltypeLevel1 = False
-                            ElseIf boolAdresParcel = True And boolnameLevel1 = True Then
-                                nameLevel1 = reader.Value
-                                boolnameLevel1 = False
-                            ElseIf boolAdresParcel = True And booltypeLevel2 = True Then
-                                typeLevel2 = reader.Value
-                                booltypeLevel2 = False
-                            ElseIf boolAdresParcel = True And boolnameLevel2 = True Then
-                                nameLevel2 = reader.Value
-                                boolnameLevel2 = False
-                            ElseIf boolAdresParcel = True And booltypeLevel3 = True Then
-                                typeLevel3 = reader.Value
-                                booltypeLevel3 = False
-                            ElseIf boolAdresParcel = True And boolnameLevel3 = True Then
-                                nameLevel3 = reader.Value
-                                boolnameLevel3 = False
-                            ElseIf boolreadable_address = True Then
-                                readable_address = reader.Value
-                                boolreadable_address = False
-                                '============================================================================
-                            ElseIf boolRightType = True And boolval = True Then
-                                RightType = reader.Value
-                                boolRightType = False
-                                boolval = False
-                            ElseIf boolOwner = True And boolOwnerName = True Then
-                                ownerName = reader.Value
-                                boolOwner = False
-                                boolOwnerName = False
-                            ElseIf boolresident = True And boolname = True Then
-                                encumbranceName = reader.Value
-                                boolresident = False
-                                boolname = False
-                                '============================================================
-                                'здания
-                            ElseIf boolpurpose = True And boolval = True And boolparams = True Then
-                                purpose_build = reader.Value 'назначение
-                                boolval = False
-                            ElseIf boolpurpose = True And boolCode = True And boolparams = True Then
-                                codeBuild = reader.Value 'код здания
-                                boolCode = False
-                            ElseIf boolposition_description = True Then
-                                pos_description_build = reader.Value 'описание местоположения
-                                boolposition_description = False
-                            ElseIf boolpermitted_use = True And boolname = True Then
-                                permitted_use = reader.Value
-                                '===================================================================
-                                'сооружения
-                            ElseIf boolparams = True And boolpurpose = True Then
-                                purpose_construction = reader.Value
-                                boolpurpose = False
-                            ElseIf boolbase_parameter = True And boolextension = True Then
-                                baseParameters = baseParameters & "Длина " & reader.Value & " "
-                                boolextension = False
-                            ElseIf boolbase_parameter = True And booldepth = True Then
-                                baseParameters = baseParameters & "Глубина " & reader.Value & " "
-                                booldepth = False
-                            ElseIf boolbase_parameter = True And booldepth = True Then
-                                baseParameters = baseParameters & "Глубина " & reader.Value & " "
-                                booldepth = False
-                            ElseIf boolbase_parameter = True And boolvolume = True Then
-                                baseParameters = baseParameters & "Объем " & reader.Value & " "
-                                boolvolume = False
-                            ElseIf boolbase_parameter = True And boolareaConstr = True Then
-                                baseParameters = baseParameters & "Общая площадь " & reader.Value & " "
-                                boolareaConstr = False
-                            ElseIf boolbase_parameter = True And boolbuilt_up_area = True Then
-                                baseParameters = baseParameters & "Общая площадь застройки " & reader.Value & " "
-                                boolbuilt_up_area = False
-                                '=======================================================================
-                                'границы
-                            ElseIf booltype_boundary = True And boolval = True Then
-                                type_boundary = reader.Value
-                                boolval = False
-                            ElseIf booltype_boundary = True And boolCode = True Then
-                                cod_boundary = reader.Value
-                                boolCode = False
-                                'береговые линии
-                            ElseIf boolwater_object_type = True And boolCode = True Then
-                                codwater_object_type = reader.Value
-                                boolCode = False
-                            ElseIf boolwater_object_type = True And boolType = True Then
-                                typewater_object_type = reader.Value
-                                boolType = False
-                            ElseIf boolwater_object_name = True Then
-                                water_object_name = reader.Value
-                                boolwater_object_name = False
-                                '==============================================================================
-                                'территориальные зоны
-                            ElseIf boolregistration_date = True And boolrecord_info = True Then
-                                registr_data = reader.Value
-                                boolregistration_date = False
-                            ElseIf boolType_zone = True And boolval = True Then 'тип ЗОУИТ
-                                type_zona = reader.Value
-                                boolval = False
-                            ElseIf boolType_zone = True And boolCode = True Then 'код ЗОУИТ
-                                code_zona = reader.Value
-                                boolCode = False
-                            ElseIf boolRegNumbZone = True Then
-                                RegNumbZone = reader.Value
-                                boolRegNumbZone = False
-                            ElseIf boolzone = True And boolIndexZona = True Then 'индекс зоны
-                                IndexZona = reader.Value
-                                boolIndexZona = False
-                            ElseIf boolzone = True And boolNumberZona = True Then 'номер зоны
-                                NumberZona = reader.Value
-                                boolNumberZona = False
-                                'координаты точек
-                                '======================================================================================
-                            ElseIf boolOrgNumb = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(1, countcoord) = reader.Value 'номер точки
-                                    OrgNumb = reader.Value
-                                End If
-                                boolOrgNumb = False
-                            ElseIf boolX = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(2, countcoord) = reader.Value 'X
-                                    X = reader.Value
-                                End If
-                                boolX = False
-                            ElseIf boolY = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(3, countcoord) = reader.Value 'Y
-                                    Y = reader.Value
-                                End If
-                                boolY = False
-                            ElseIf boolDelta = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(4, countcoord) = reader.Value 'Delta
-                                    Delta = reader.Value
-                                End If
-                                boolDelta = False
-                            ElseIf boolnum_geopoint = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(5, countcoord) = reader.Value 'старый номер
-                                End If
-                                boolnum_geopoint = False
-                            ElseIf boolgeopoint_zacrep = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(6, countcoord) = reader.Value 'тип закрепления
-                                End If
-                                boolnum_geopoint = False
-                            ElseIf boolGeopoint_opred = True And boolval = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(7, countcoord) = reader.Value
-                                End If
-                                boolGeopointValue = False
-                            ElseIf boolR = True Then
-                                If IsArray(NXYZ) = True Then
-                                    NXYZ(8, countcoord) = reader.Value
-                                    NXYZ(0, countcoord) = "Окружность"
-                                End If
-                                boolR = False
-                                '===================================================================================
-                                'реквизиты выписки
-                            ElseIf booldate_formation = True Then
-                                dataVP = reader.Value
-                                booldate_formation = False
-                            ElseIf boolregistration_number = True Then
-                                NumberVP = reader.Value
-                                boolregistration_number = False
-                            End If
-                            '====================================================================================================
-                            'блоки закрытия
-                        Case XmlNodeType.EndElement
-                            '=======================================================================
-                            'блок общих данных
-                            If NameBlock Like "common_data" Then
-                                boolcomdata = False
-                            ElseIf NameBlock Like "code" Then
-                                boolCode = False
-                            ElseIf NameBlock Like "value" Then
-                                boolval = False
-                            ElseIf NameBlock Like "type" Then
-                                boolType = False
-                            ElseIf NameBlock Like "unit" Then
-                                boolunit = False
-                            ElseIf NameBlock Like "name" Then
-                                boolname = False
-                                '=========================================================
-                            ElseIf NameBlock Like "area_quarter" Then
-                                boolarea_quarter = False
-                            ElseIf NameBlock Like "group_top_requisites" Then
-                                boolgroup_top_requisites = False
-                            ElseIf NameBlock Like "cad_number" Then
-                                boolCadNumber = False
-                            ElseIf NameBlock Like "common_land_cad_number" Then
-                                boolcommon_land_cad_number = False
-                            ElseIf NameBlock Like "subtype" Then
-                                boolSubTypeParcel = False
-                            ElseIf NameBlock Like "State" Then
-                                boolStateParcel = False
-                            ElseIf NameBlock Like "category" Then
-                                boolCategory = False
-                            ElseIf NameBlock Like "permitted_use" Then
-                                boolRazrIsp = False
-                            ElseIf NameBlock Like "cost" Then
-                                boolCostParcel = False
-                            ElseIf NameBlock Like "area" Then
-                                boolGlobalArea = False
-                                '=========================================================
-                                'адрес
-                            ElseIf NameBlock Like "address" Then
-                                boolAdresParcel = False
-                                If okato.Trim.Length > 0 Then
-                                    AddresParcel = "ОКАТО " & okato & " "
-                                    okato = ""
-                                End If
-                                If kladr.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & "КЛАДР " & kladr & " "
-                                    kladr = ""
-                                End If
-                                If postcode.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & "Индекс " & postcode & " "
-                                    postcode = ""
-                                End If
-                                If region.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & region & " "
-                                    region = ""
-                                End If
-                                If typeDistrict.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & typeDistrict & " "
-                                    typeDistrict = ""
-                                End If
-                                If nameDistrict.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & nameDistrict & " "
-                                    nameDistrict = ""
-                                End If
-                                If typeLocality.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & typeLocality & " "
-                                    typeLocality = ""
-                                End If
-                                If nameLocalyty.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & nameLocalyty & " "
-                                    nameLocalyty = ""
-                                End If
-                                If type_street.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & type_street & " "
-                                    type_street = ""
-                                End If
-                                If name_street.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & name_street & " "
-                                    name_street = ""
-                                End If
-                                If typeLevel1.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & typeLevel1 & " "
-                                    typeLevel1 = ""
-                                End If
-                                If nameLevel1.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & nameLevel1 & " "
-                                    nameLevel1 = ""
-                                End If
-                                If typeLevel2.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & typeLevel2 & " "
-                                    typeLevel2 = ""
-                                End If
-                                If nameLevel2.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & nameLevel2 & " "
-                                    nameLevel2 = ""
-                                End If
-                                If typeLevel3.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & typeLevel3 & " "
-                                    typeLevel3 = ""
-                                End If
-                                If nameLevel3.Trim.Length > 0 Then
-                                    AddresParcel = AddresParcel & nameLevel3 & " "
-                                    nameLevel3 = ""
-                                End If
-                            ElseIf NameBlock Like "okato" Then
-                                boolokato = False
-                            ElseIf NameBlock Like "kladr" Then
-                                boolkladr = False
-                            ElseIf NameBlock Like "region" Then
-                                boolregion = False
-                            ElseIf NameBlock Like "type_district" Then
-                                booltypeDistrict = False
-                            ElseIf NameBlock Like "name_district" Then
-                                boolnameDistrict = False
-                            ElseIf NameBlock Like "type_locality" Then
-                                booltypeLocality = False
-                            ElseIf NameBlock Like "name_locality" Then
-                                boolnameLocality = False
-                            ElseIf NameBlock Like "type_street" Then
-                                booltypeStreet = False
-                            ElseIf NameBlock Like "name_street" Then
-                                boolnameStreet = False
-                            ElseIf NameBlock Like "type_level1" Then
-                                booltypeLevel1 = False
-                            ElseIf NameBlock Like "name_level1" Then
-                                boolnameLevel1 = False
-                            ElseIf NameBlock Like "type_level2" Then
-                                booltypeLevel2 = False
-                            ElseIf NameBlock Like "name_level2" Then
-                                boolnameLevel2 = False
-                            ElseIf NameBlock Like "type_level3" Then
-                                booltypeLevel3 = False
-                            ElseIf NameBlock Like "name_level3" Then
-                                boolnameLevel3 = False
-                                '============================================================================
-                            ElseIf NameBlock Like "purpose" Then
-                                boolpurpose = False
-                            ElseIf NameBlock Like "params" Then
-                                boolparams = False
-                            ElseIf NameBlock Like "permitted_use" Then
-                                boolpermitted_use = False
-                            ElseIf NameBlock Like "base_parameter" Then
-                                boolbase_parameter = False
-                            ElseIf NameBlock Like "type_boundary" Then
-                                booltype_boundary = False
-                            ElseIf NameBlock Like "type_zone" Then
-                                boolType_zone = False
-                            ElseIf NameBlock Like "record_info" Then
-                                boolrecord_info = False
-                            ElseIf NameBlock Like "registration_date" Then
-                                boolregistration_date = False 'дата регистрации зоны
-                            ElseIf NameBlock Like "object_part" Then
-                                boolPart = False
-                            ElseIf NameBlock Like "number_pp" Then 'номер контура
-                                boolNumberContour = False
-                            ElseIf NameBlock Like "area" Then
-                                boolGlobalArea = False
-                            ElseIf NameBlock Like "spatials_elements" Then
-                                boolSpatialElements = False
-                            ElseIf NameBlock Like "geopoint_opred" Then
-                                boolGeopoint_opred = False
-                            ElseIf NameBlock Like "x" Then
-                                boolX = False
-                            ElseIf NameBlock Like "y" Then
-                                boolY = False
-                            ElseIf NameBlock Like "geopoint_opred" Then
-                                boolGeopoint_opred = False
-                            ElseIf NameBlock Like "ord_nmb" Then
-                                boolOrgNumb = False
-                            ElseIf NameBlock Like "num_geopoint" Then
-                                boolnum_geopoint = False
-                            ElseIf NameBlock Like "delta_geopoint" Then
-                                boolDelta = False
-                            ElseIf NameBlock Like "r" Then
-                                boolR = False
-                                '===================================================================================================
-                                'конец блока с координатами контура
-                            ElseIf NameBlock Like "spatial_element" Then
-                                '=====================================================================================
-                                'делаем оформление
-                                If boolParcel = True Then
-                                    'не требуется выводить участки
-                                    If FormKPTImport.CheckBox1.Checked = False Then
-                                        Erase NXYZ
-                                        countcoord = -1
-                                        Continue While
+                        End If
+                    Next
+                    If boundPolygon.Area < 1 Then
+                        MsgBox("Выберите другую внешнюю границу.")
+                        Exit Sub
+                    End If
+                End If
+                'читаем земельные участки
+                For Each file As String In files
+                    Try
+                        Dim listDictionaryData As List(Of Dictionary(Of String, Object)) = CadastralTools.JsonValidator.CreateObjectsFromJsonFile(file)
+                        If listDictionaryData.Count > 0 Then
+                            Dim dataCadastralObject As CadastralTools.StructureElement = New CadastralTools.StructureElement
+                            Dim dictLandProperties As Dictionary(Of String, String) = New Dictionary(Of String, String)
+                            dataCadastralObject.Label = "Земельный кадастр"
+                            Dim idStructure As String = ""
+                            Dim tableZn As String = ""
+                            Dim PSTable As String = ""
+                            Dim typeZn As String = "Полилиния"
+                            Dim Label As String = ""
+                            Dim idName As Integer = 0
+                            Dim countOstrov As Integer = 1
+                            Dim listPolygonCoordinates As List(Of String(,)) = New List(Of String(,))
+                            For Each cadastralObject As Dictionary(Of String, Object) In listDictionaryData
+                                If IsNothing(cadastralObject) = True Then Continue For
+                                If cadastralObject.Count > 0 Then
+                                    If cadastralObject.ContainsKey("PS") = True Then
+                                        PSTable = cadastralObject.Item("PS")
                                     End If
-                                ElseIf boolBuild = True Or boolunderconstruction = True Then
-                                    If FormKPTImport.CheckBox2.Checked = False Then
-                                        Erase NXYZ
-                                        countcoord = -1
-                                        Continue While
+                                    If cadastralObject.ContainsKey("LABEL") = True Then
+                                        Label = cadastralObject.Item("LABEL")
                                     End If
-                                ElseIf boolconstruction = True Then
-                                    If FormKPTImport.CheckBox3.Checked = False Then
-                                        Erase NXYZ
-                                        countcoord = -1
-                                        Continue While
+                                    If cadastralObject.ContainsKey("NameTypeObject") = True Then
+                                        idName = Val(cadastralObject.Item("NameTypeObject"))
                                     End If
-                                ElseIf boolboundary = True Or boolcityboundary Or boolcoastline Then
-                                    If FormKPTImport.CheckBox4.Checked = False Then
-                                        Erase NXYZ
-                                        countcoord = -1
-                                        Continue While
-                                    End If
-                                ElseIf boolzone = True Then
-                                    If FormKPTImport.CheckBox5.Checked = False Then
-                                        Erase NXYZ
-                                        countcoord = -1
-                                        Continue While
-                                    End If
-                                ElseIf boolKvartal = True Then
-                                    If FormKPTImport.CheckBox6.Checked = False Then
-                                        Erase NXYZ
-                                        countcoord = -1
-                                        Continue While
-                                    End If
-                                End If
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                                'блок лля проверки дубликатов объектов
-                                If boolParcel = True Or boolBuild = True Or boolconstruction = True Or boolunderconstruction = True Then
-                                    If IsArray(ArrayOldCadastrNumbers) = True Then
-                                        For k As Integer = 0 To ArrayOldCadastrNumbers.Length - 1
-                                            Dim OldNumber As String = ArrayOldCadastrNumbers(k)
-                                            If Cad_Number Like OldNumber Then
-                                                Erase NXYZ
-                                                countcoord = -1
-                                                Continue While
-                                            End If
-                                        Next
-                                    End If
-                                End If
-                                If boolcityboundary = True Or boolboundary = True Or boolzone = True Or boolcoastline = True Then
-                                    If IsArray(ArrayOldCadastrRegNumbers) = True Then
-                                        For k As Integer = 0 To ArrayOldCadastrRegNumbers.Length - 1
-                                            Dim OldNumber As String = ArrayOldCadastrRegNumbers(k)
-                                            If RegNumbZone Like OldNumber Then
-                                                Erase NXYZ
-                                                countcoord = -1
-                                                Continue While
-                                            End If
-                                        Next
-                                    End If
-                                End If
-                                If boolKvartal = True Then
-                                    If IsArray(ArrayOldCadastrKVNumbers) = True Then
-                                        For k As Integer = 0 To ArrayOldCadastrKVNumbers.Length - 1
-                                            Dim OldNumber As String = ArrayOldCadastrKVNumbers(k)
-                                            If CadastralBlock Like OldNumber Then
-                                                Erase NXYZ
-                                                countcoord = -1
-                                                Continue While
-                                            End If
-                                        Next
-                                    End If
-                                End If
+                                    'читаем свойства объекта
+                                    Dim boolReadDict As Boolean = CadastralTools.DataFormatting.ConvertToDictionaryOfString(cadastralObject, dictLandProperties)
 
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                                'вставляем полилинию или окружность в качестве объекта
-                                If IsArray(NXYZ) = True Then
-                                    Dim areaObj As Double = 0
-                                    Dim idObjectUser As UInteger = 0
-                                    Dim centerPoint As Point3D = Nothing
-                                    Dim boolOstrov As Boolean = False
-                                    If NXYZ.GetUpperBound(1) > 0 Then
-                                        'если число вершин больше 1 тогда рисуем полилинию
-                                        Dim acPLine As DwgPolyline = CadastralFunction.FuncDrawPolylineToArrayCoord(ActivDocument, NXYZ)
-                                        If IsNothing(acPLine) = False Then
-                                            idObjectUser = acPLine.ObjectID
-                                            'если объект имеет площадь тогда проеверяем контур на принадлежность к островку и ищем внутренню точку
-                                            If Val(GlobalArea) > 0 And NXYZ.GetUpperBound(1) > 1 Then
-                                                acPLine.Closed = True
-                                                areaObj = acPLine.Area
-                                                'проверяем вдруг это островок
-                                                If IsArray(ObjectCollections) = True Then
-                                                    For j1 As Integer = ObjectCollections.GetUpperBound(1) To 0 Step -1
-                                                        Dim tempNumb As String = ObjectCollections(0, j1)
-                                                        If tempNumb Like "Внутренний островок" Then
-                                                            Continue For
-                                                        End If
-                                                        Dim tempArea As Double = GlobalArea
-                                                        If tempArea = 0 Then Continue For
-                                                        If tempArea >= acPLine.Area Then Continue For
-                                                        Dim tempHandle As UInteger = Val(ObjectCollections(1, j1))
-                                                        Dim tempEnt As DwgObject = Nothing
-                                                        ActivDocument.ActiveSpace.Entities.TryGetObject(tempHandle, tempEnt) 'находим его id
-                                                        If IsNothing(tempEnt) = False Then
-                                                            If TypeOf tempEnt Is DwgPolyline Then
-                                                                Dim tempPoly As DwgPolyline = tempEnt
-                                                                If tempPoly.Bounds.Min.X > acPLine.Bounds.Min.X And tempPoly.Bounds.Min.Y > acPLine.Bounds.Min.Y Then
-                                                                    If tempPoly.Bounds.Max.X < acPLine.Bounds.Max.X And tempPoly.Bounds.Max.Y < acPLine.Bounds.Max.Y Then
-                                                                        Dim arrayVertexDbl As Double(,) = Nothing
-                                                                        Dim boolVertDbl As Boolean = FuncConvertData.FuncConvertVertexPolylineToArrayDbl(tempPoly, arrayVertexDbl)
-                                                                        If IsArray(arrayVertexDbl) = True Then
-                                                                            Dim booIns As Boolean = MathFunction.FuncCrossPointPolyline(arrayVertexDbl, acPLine.Item(0).Vertex)
-                                                                            If IsError(booIns) = True Then
-                                                                                booIns = False
-                                                                            End If
-                                                                            If booIns = True Then
-                                                                                boolOstrov = True
-                                                                                Exit For
-                                                                            End If
-                                                                        End If
-                                                                    End If
+                                    If cadastralObject.ContainsKey("ListCoord") Then
+                                        Dim dataCoordParcel As Dictionary(Of String, Object) = cadastralObject("ListCoord")
+
+                                        For Each kvp As KeyValuePair(Of String, Object) In dataCoordParcel
+                                            Dim dataCoordCounter As List(Of Object) = TryCast(kvp.Value, List(Of Object))
+                                            If dataCoordCounter Is Nothing OrElse dataCoordCounter.Count = 0 Then Continue For
+
+                                            For Each coordItem As Object In dataCoordCounter
+                                                Dim listCoordinates As List(Of Object) = TryCast(coordItem, List(Of Object))
+                                                If listCoordinates Is Nothing OrElse listCoordinates.Count < 3 Then Continue For
+
+                                                ' Извлекаем списки координат (индексы 1 и 2)
+                                                Dim elementCoordX As List(Of Object) = TryCast(listCoordinates(1), List(Of Object))
+                                                Dim elementCoordY As List(Of Object) = TryCast(listCoordinates(2), List(Of Object))
+
+                                                If elementCoordX Is Nothing OrElse elementCoordY Is Nothing Then Continue For
+                                                If elementCoordX.Count = 0 OrElse elementCoordX.Count <> elementCoordY.Count Then Continue For
+
+                                                ' Создаём массив координат [Точки x Y]
+                                                Dim pointCount As Integer = elementCoordX.Count
+                                                Dim arrayCoord(pointCount - 1, 1) As String  ' [индекс точки, 0=X, 1=Y]
+
+                                                For k As Integer = 0 To pointCount - 1
+                                                    arrayCoord(k, 0) = elementCoordX(k).ToString()
+                                                    arrayCoord(k, 1) = elementCoordY(k).ToString()
+                                                Next k
+
+                                                If IsNothing(boundPolygon) = False Then
+                                                    If boundPolygon.Area > 1 Then
+                                                        If Not (PSTable Like "LAND_CADASTRAL_DIVISION") Then
+                                                            If arrayCoord.GetUpperBound(1) = 0 Then
+                                                                'это точка
+                                                                Dim point As NetTopologySuite.Geometries.Point = New NetTopologySuite.Geometries.Point(arrayCoord(0, 0), arrayCoord(1, 0))
+                                                                Dim boolIntersect As Boolean = cadastralToolsNetTopoSuit.IsPointInsidePolygon(point, boundPolygon)
+                                                                If boolIntersect = False Then
+                                                                    Continue For
+                                                                End If
+                                                            Else
+                                                                Dim lineStr As NetTopologySuite.Geometries.LineString = cadastralToolsNetTopoSuit.CreateLineString(arrayCoord)
+                                                                Dim boolIntersect As Boolean = cadastralToolsNetTopoSuit.DoesLineIntersectPolygon(lineStr, boundPolygon)
+                                                                If boolIntersect = False Then
+                                                                    Continue For
                                                                 End If
                                                             End If
                                                         End If
-                                                    Next j1
+                                                    End If
                                                 End If
-                                            End If
-                                        End If
-                                    Else
-                                        '==================================================================================
-                                        'вставляем окружность нужного радиуса
-                                        Dim acCirc As DwgCircle = New DwgCircle()
-                                        acCirc.Center = New Topomatic.Cad.Foundation.Vector3D(Val(NXYZ(3, 0)), Val(NXYZ(2, 0)), 0)
-                                        r = Val(NXYZ(8, 0))
-                                        If r <= 0 Then
-                                            r = 1
-                                        End If
-                                        acCirc.Radius = r
-                                        ActivDocument.ActiveSpace.Add(acCirc)
-                                        idObjectUser = acCirc.ObjectID
-                                        areaObj = 0
+                                                listPolygonCoordinates.Add(arrayCoord)
+                                            Next coordItem
+                                        Next kvp
                                     End If
-                                    Erase NXYZ
-                                    countcoord = -1
-                                    '0-обозначение, 1 -ID , 2-
-                                    ReDim Preserve ObjectCollections(2, CountObjectCollection)
-                                    If boolOstrov = True Then
-                                        ObjectCollections(2, CountObjectCollection) = "Внутренний островок"
-                                        ObjectCollections(0, CountObjectCollection) = ""
-                                    ElseIf NumberSubParcel.Trim.Length > 0 Then
-                                        ObjectCollections(0, CountObjectCollection) = "\" & NumberSubParcel
-                                        ObjectCollections(2, CountObjectCollection) = "Часть"
-                                    ElseIf NumberContour.Trim.Length > 0 Then
-                                        ObjectCollections(0, CountObjectCollection) = "(" & NumberContour & ")"
-                                        ObjectCollections(2, CountObjectCollection) = "Контур"
-                                    Else
-                                        ObjectCollections(0, CountObjectCollection) = ""
-                                        ObjectCollections(2, CountObjectCollection) = "Контур"
-                                    End If
-                                    ObjectCollections(1, CountObjectCollection) = idObjectUser 'ID объекта
-                                    CountObjectCollection += 1
                                 End If
-                            ElseIf NameBlock Like "land_record" Then
-                                boolParcel = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            ElseIf TypeOf acEnt Is DwgCircle Then
-                                                Dim acCircle As DwgCircle = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 15)
-                                                ArrayData(0, 0) = "Cad_number"
-                                                If Cad_Number_Note.Trim.Length > 0 Then
-                                                    ArrayData(1, 0) = Cad_Number_Note & " вх.н. " & Cad_Number & numKounter
-                                                Else
-                                                    ArrayData(1, 0) = Cad_Number & numKounter
-                                                End If
-
-                                                ArrayData(0, 1) = "Short_cad_number"
-                                                ArrayData(1, 1) = Cad_Number_Short & numKounter
-
-                                                ArrayData(0, 2) = "Type"
-                                                ArrayData(1, 2) = SubTypeParcel
-
-                                                ArrayData(0, 3) = "Area"
-                                                ArrayData(1, 3) = GlobalArea
-
-                                                ArrayData(0, 4) = "Inaccuracy"
-                                                ArrayData(1, 4) = deltaArea
-
-                                                ArrayData(0, 5) = "OKATO"
-                                                ArrayData(1, 5) = AddresParcel
-
-                                                ArrayData(0, 6) = "Adress"
-                                                ArrayData(1, 6) = readable_address
-
-                                                ArrayData(0, 7) = "Category"
-                                                ArrayData(1, 7) = Category
-
-                                                ArrayData(0, 8) = "UtilizationByDoc"
-                                                ArrayData(1, 8) = RazrIspByDoc
-
-                                                ArrayData(0, 9) = "Utilization"
-                                                ArrayData(1, 9) = RazrIsp
-
-                                                ArrayData(0, 10) = "CadastralCost"
-                                                ArrayData(1, 10) = CostParcel
-
-                                                ArrayData(0, 11) = "Right_type"
-                                                ArrayData(1, 11) = RightType
-
-                                                ArrayData(0, 12) = "Patronymic"
-                                                ArrayData(1, 12) = ownerName
-
-                                                ArrayData(0, 13) = "Encumbrance"
-                                                ArrayData(1, 13) = encumbranceName
-
-                                                ArrayData(0, 14) = "LOCALID"
-                                                ArrayData(1, 14) = rng.Next
-
-                                                ArrayData(0, 15) = "GlobalID"
-                                                ArrayData(1, 15) = GlobalID
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_PARCEL", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = Cad_Number & numKounter
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
+                            Next
+                            'преобразуйм в единую строку
+                            Dim keyParam As String = CadastralTools.JsonValidator.convertDictionaryToJson(dictLandProperties)
+                            '==========================================================================================================
+                            'включена опция проверки дубликатов
+                            Dim cadNumber As String = ""
+                            Dim cadObjectNumber As Object = CadastralTools.JsonValidator.GetValueFromJson(keyParam, "Cad_number")
+                            If TypeOf cadObjectNumber Is String Then
+                                cadNumber = cadObjectNumber
+                            Else
+                                cadObjectNumber = CadastralTools.JsonValidator.GetValueFromJson(keyParam, "Reg_numb_border")
+                                If TypeOf cadObjectNumber Is String Then
+                                    cadNumber = cadObjectNumber
                                 End If
-
-                                Erase ObjectCollections
-                                Cad_Number_Note = ""
-                                GlobalArea = 0
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                                'plfybz b cnhjtybz
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                            ElseIf NameBlock Like "build_record" Then
-                                boolBuild = False
-                                OldCodObject = ""
-                                'блок кода для определения внутренних островков
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            ElseIf TypeOf acEnt Is DwgCircle Then
-                                                Dim acCircle As DwgCircle = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 15)
-                                                ArrayData(0, 0) = "Cad_number"
-                                                ArrayData(1, 0) = Cad_Number & numKounter
-
-                                                ArrayData(0, 1) = "Short_cad_number"
-                                                ArrayData(1, 1) = Cad_Number_Short & numKounter
-
-                                                ArrayData(0, 2) = "Assignation"
-                                                ArrayData(1, 2) = permitted_use
-
-                                                ArrayData(0, 3) = "Area"
-                                                ArrayData(1, 3) = GlobalArea
-
-                                                ArrayData(0, 4) = "OKATO"
-                                                ArrayData(1, 4) = AddresParcel
-
-                                                ArrayData(0, 5) = "Adress"
-                                                ArrayData(1, 5) = readable_address
-
-                                                ArrayData(0, 6) = "CadastralCost"
-                                                ArrayData(1, 6) = CostParcel
-
-                                                ArrayData(0, 7) = "KeyParameter"
-                                                ArrayData(1, 7) = baseParameters
-
-                                                ArrayData(0, 8) = "State"
-                                                ArrayData(1, 8) = purpose_build
-
-                                                ArrayData(0, 9) = "Right_type"
-                                                ArrayData(1, 9) = RightType
-
-                                                ArrayData(0, 10) = "Patronymic"
-                                                ArrayData(1, 10) = ownerName
-
-                                                ArrayData(0, 11) = "Encumbrance"
-                                                ArrayData(1, 11) = encumbranceName
-
-                                                ArrayData(0, 12) = "LOCALID"
-                                                ArrayData(1, 12) = LocalID
-
-                                                ArrayData(0, 13) = "GlobalID"
-                                                ArrayData(1, 13) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_BUILDING", ArrayData, templateXML)
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = Cad_Number & numKounter
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                Cad_Number_Short = ""
-                                purpose_build = ""
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                            ElseIf NameBlock Like "municipal_boundary_record" Then
-                                boolboundary = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 4)
-                                                ArrayData(0, 0) = "Reg_numb_border"
-                                                ArrayData(1, 0) = RegNumbZone
-
-                                                ArrayData(0, 1) = "Type_boundary"
-                                                ArrayData(1, 1) = type_boundary
-
-                                                ArrayData(0, 2) = "DateRegistration"
-                                                ArrayData(1, 2) = registr_data
-
-                                                ArrayData(0, 3) = "LOCALID"
-                                                ArrayData(1, 3) = LocalID
-
-                                                ArrayData(0, 4) = "GlobalID"
-                                                ArrayData(1, 4) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_BOUNDARY", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = RegNumbZone
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                RegNumbZone = ""
-                            ElseIf NameBlock Like "inhabited_locality_boundary_record" Then
-                                boolcityboundary = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 4)
-                                                ArrayData(0, 0) = "Reg_numb_border"
-                                                ArrayData(1, 0) = RegNumbZone
-
-                                                ArrayData(0, 1) = "Type_boundary"
-                                                ArrayData(1, 1) = type_boundary
-
-                                                ArrayData(0, 2) = "DateRegistration"
-                                                ArrayData(1, 2) = registr_data
-
-                                                ArrayData(0, 3) = "LOCALID"
-                                                ArrayData(1, 3) = LocalID
-
-                                                ArrayData(0, 4) = "GlobalID"
-                                                ArrayData(1, 4) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_BOUNDARY", ArrayData, templateXML)
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = RegNumbZone
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                RegNumbZone = ""
-                            ElseIf NameBlock Like "construction_record" Then
-                                boolconstruction = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            ElseIf TypeOf acEnt Is DwgCircle Then
-                                                Dim acCircle As DwgCircle = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 11)
-                                                ArrayData(0, 0) = "Cad_number"
-                                                ArrayData(1, 0) = Cad_Number & numKounter
-
-                                                ArrayData(0, 1) = "Short_cad_number"
-                                                ArrayData(1, 1) = Cad_Number_Short & numKounter
-
-                                                ArrayData(0, 2) = "Assignation"
-                                                ArrayData(1, 2) = purpose_construction
-
-                                                ArrayData(0, 3) = "OKATO"
-                                                ArrayData(1, 3) = AddresParcel
-
-                                                ArrayData(0, 4) = "Adress"
-                                                ArrayData(1, 4) = readable_address
-
-                                                ArrayData(0, 5) = "CadastralCost"
-                                                ArrayData(1, 5) = CostParcel
-
-                                                ArrayData(0, 6) = "KeyParameter"
-                                                ArrayData(1, 6) = baseParameters
-
-                                                ArrayData(0, 7) = "Right_type"
-                                                ArrayData(1, 7) = RightType
-
-                                                ArrayData(0, 8) = "Patronymic"
-                                                ArrayData(1, 8) = ownerName
-
-                                                ArrayData(0, 9) = "Encumbrance"
-                                                ArrayData(1, 9) = encumbranceName
-
-                                                ArrayData(0, 10) = "LOCALID"
-                                                ArrayData(1, 10) = LocalID
-
-                                                ArrayData(0, 11) = "GlobalID"
-                                                ArrayData(1, 11) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_CONSTRUCTION", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = Cad_Number & numKounter
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                Cad_Number_Short = ""
-                            ElseIf NameBlock Like "object_under_construction_record" Then
-                                'блок кода для определения внутренних островков
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            ElseIf TypeOf acEnt Is DwgCircle Then
-                                                Dim acCircle As DwgCircle = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 11)
-                                                ArrayData(0, 0) = "Cad_number"
-                                                ArrayData(1, 0) = Cad_Number & numKounter
-
-                                                ArrayData(0, 1) = "Short_cad_number"
-                                                ArrayData(1, 1) = Cad_Number_Short & numKounter
-
-                                                ArrayData(0, 2) = "Assignation"
-                                                ArrayData(1, 2) = permitted_use
-
-                                                ArrayData(0, 3) = "OKATO"
-                                                ArrayData(1, 3) = AddresParcel
-
-                                                ArrayData(0, 4) = "Adress"
-                                                ArrayData(1, 4) = readable_address
-
-                                                ArrayData(0, 5) = "CadastralCost"
-                                                ArrayData(1, 5) = CostParcel
-
-                                                ArrayData(0, 6) = "KeyParameter"
-                                                ArrayData(1, 6) = baseParameters
-
-                                                ArrayData(0, 7) = "Right_type"
-                                                ArrayData(1, 7) = RightType
-
-                                                ArrayData(0, 8) = "Patronymic"
-                                                ArrayData(1, 8) = ownerName
-
-                                                ArrayData(0, 9) = "Encumbrance"
-                                                ArrayData(1, 9) = encumbranceName
-
-                                                ArrayData(0, 10) = "LOCALID"
-                                                ArrayData(1, 10) = LocalID
-
-                                                ArrayData(0, 11) = "GlobalID"
-                                                ArrayData(1, 11) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_BUILDING", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = Cad_Number & numKounter
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                boolunderconstruction = False
-                                Cad_Number_Short = ""
-                            ElseIf NameBlock Like "zones_and_territories_record" Then
-                                boolzone = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 7)
-                                                ArrayData(0, 0) = "Reg_numb_border"
-                                                ArrayData(1, 0) = RegNumbZone
-
-                                                ArrayData(0, 1) = "Type_boundary"
-                                                ArrayData(1, 1) = type_boundary
-
-                                                ArrayData(0, 2) = "Type_zone"
-                                                ArrayData(1, 2) = type_zona
-
-                                                ArrayData(0, 3) = "Index"
-                                                ArrayData(1, 3) = IndexZona
-
-                                                ArrayData(0, 4) = "Number"
-                                                ArrayData(1, 4) = NumberZona
-
-                                                ArrayData(0, 5) = "DateRegistration"
-                                                ArrayData(1, 5) = registr_data
-
-                                                ArrayData(0, 6) = "LOCALID"
-                                                ArrayData(1, 6) = LocalID
-
-                                                ArrayData(0, 7) = "GlobalID"
-                                                ArrayData(1, 7) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_ZONE", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(2, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = RegNumbZone
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                RegNumbZone = ""
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                                'кадастровый квартал
-                            ElseIf NameBlock Like "spatial_data" Then
-                                boolspatial_data = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "Cadastral_number"
-                                                ArrayData(1, 0) = CadastralBlock
-
-                                                ArrayData(0, 1) = "Area"
-                                                ArrayData(1, 1) = Area_quarter
-
-                                                ArrayData(0, 2) = "LOCALID"
-                                                ArrayData(1, 2) = LocalID
-
-                                                ArrayData(0, 3) = "GlobalID"
-                                                ArrayData(1, 3) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_DIVISION", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = CadastralBlock
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                                'береговые линии
-                            ElseIf NameBlock Like "coastline_record" Then
-                                boolcoastline = False
-                                OldCodObject = ""
-                                If IsArray(ObjectCollections) = True Then
-                                    'сортируем соллекцию в случае если там более 1 элемента
-                                    For k As Integer = 0 To ObjectCollections.GetUpperBound(1)
-                                        Dim numKounter As String = ObjectCollections(0, k) 'обозначение контура
-                                        Dim HgStr As UInteger = ObjectCollections(1, k) 'handle контура
-                                        Dim typeCounter As String = ObjectCollections(2, k) 'контур или часть
-                                        Dim acEnt As DwgObject = Nothing
-                                        ActivDocument.ActiveSpace.Entities.TryGetObject(HgStr, acEnt) 'находим его id
-                                        If IsNothing(acEnt) = False Then
-                                            If TypeOf acEnt Is DwgPolyline Then
-                                                'делаем оформление
-                                                Dim acPline As DwgPolyline = acEnt
-                                            End If
-                                            'присваиваем расширенные данные
-                                            If typeCounter Like "Часть" Or typeCounter Like "Контур" Then
-
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 6)
-                                                ArrayData(0, 0) = "Reg_numb_border"
-                                                ArrayData(1, 0) = RegNumbZone & numKounter
-
-                                                ArrayData(0, 1) = "Type_boundary"
-                                                ArrayData(1, 1) = type_boundary
-
-                                                ArrayData(0, 2) = "Name"
-                                                ArrayData(1, 2) = water_object_name
-
-                                                ArrayData(0, 3) = "Water_object_type"
-                                                ArrayData(1, 3) = typewater_object_type
-
-                                                ArrayData(0, 4) = "DateRegistration"
-                                                ArrayData(1, 4) = registr_data
-
-                                                ArrayData(0, 5) = "LOCALID"
-                                                ArrayData(1, 5) = LocalID
-
-                                                ArrayData(0, 6) = "GlobalID"
-                                                ArrayData(1, 6) = GlobalID
-
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "LAND_CADASTRAL_ZONE", ArrayData, templateXML)
-
-                                            Else
-                                                Dim ArrayData As String(,) = Nothing
-                                                ReDim Preserve ArrayData(1, 3)
-                                                ArrayData(0, 0) = "IDKOUNTER"
-                                                ArrayData(1, 0) = LocalID
-
-                                                ArrayData(0, 1) = "LOCALID"
-                                                ArrayData(1, 1) = rng.Next
-
-                                                ArrayData(0, 2) = "ConditionalNumber"
-                                                ArrayData(1, 2) = k + 1
-
-                                                ArrayData(0, 3) = "NOTE"
-                                                ArrayData(1, 3) = RegNumbZone & numKounter
-                                                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(acEnt, "CADASTRAL_OSTROV", ArrayData, templateXML)
-                                            End If
-                                        End If
-                                    Next k
-                                End If
-                                Erase ObjectCollections
-                                RegNumbZone = ""
-                                'Dim PosText As Boolean = AcadFunction.FuncDrawMText(InsertPointText, kanNumStr, HtextZone, LayerObject, idTTextStyle)
-                                water_object_name = ""
-                                typewater_object_type = ""
-                            ElseIf NameBlock Like "water_object_type" Then
-                                boolwater_object_type = False
-                            ElseIf NameBlock Like "water_object_name" Then
-                                boolwater_object_name = False
-                            ElseIf NameBlock Like "extract_cadastral_plan_territory" Then
-                            ElseIf NameBlock Like "land_records" Then
-                                CodCategory = ""
                             End If
-                    End Select
-                End While
-            End If
-        End Sub
-        '===================================================================================================================================
-        'Сведения о наличии зон с особыми условиями использования территории
-        <cmd("CreateSVCadastralPlan")>
-        Public Sub CreateSVCadastralPlan()
-            'получаем активное окно
-            Dim userCadView As CadView = Me.CadView
-            If IsNothing(userCadView) Then Return
-            'получаем активный слой
-            Dim DrawLayer As DrawingLayer = DrawingLayer.GetDrawingLayer(userCadView)
-            If IsNothing(DrawLayer) = True Then Return
-            'получаем активный документ
-            Dim ActivDocument As Topomatic.Dwg.Drawing = DrawLayer.Drawing
-            If IsNothing(ActivDocument) = True Then Return
-            '================================================================================================================
-            'получаем границу
-            userCadView.SelectionSet.Clear()
-            userCadView.SelectionSet.SelectOneObjectAtScreen(Function(obj) TypeOf obj Is DwgPolyline, "Выберите границу полосы отвода: ")
-            Dim plineZone As DwgPolyline = Nothing
-            Dim boundPolyline3d As Polyline3D = New Polyline3D()
-            Dim boundBoxPolyline As BoundingBox2D = Nothing
-            Dim l1stBoundVertex As List(Of Vector2D) = New List(Of Vector2D)
-            If userCadView.SelectionSet.Count > 0 Then
-                For Each acEnt As Object In userCadView.SelectionSet
-                    If TypeOf acEnt Is DwgPolyline Then
-                        Dim acPoly As DwgPolyline = acEnt
-                        boundBoxPolyline = acPoly.Bounds
-                        acPoly.GetPolyline(boundPolyline3d)
-                        boundPolyline3d.ConvertToPosArray(l1stBoundVertex, ValueConverter.Eps)
-                        plineZone = acEnt
-                        Exit For
-                    End If
-                Next
-            End If
-            Dim arrayPositionsBound As Double() = {}
-            Dim countArrayPositionsBound As Integer = 0
-            If l1stBoundVertex.Count > 2 Then
-                For i As Integer = 0 To l1stBoundVertex.Count - 1
-                    ReDim Preserve arrayPositionsBound(countArrayPositionsBound + 1)
-                    arrayPositionsBound(countArrayPositionsBound) = l1stBoundVertex.Item(i).X
-                    arrayPositionsBound(countArrayPositionsBound + 1) = l1stBoundVertex.Item(i).Y
-                    countArrayPositionsBound += 2
-                Next i
-            End If
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'создаем новый сводный план
-            Dim userProject As ModelProject = ApplicationHost.Current.ActiveProject
-            Dim folder As String = PluginCoreOps.FindModelPathId(PluginCoreOps.CreateFolder(New String() {"Модели", "LandCadastral", "CadastralPlan"}))
-            Try
-                Dim iUserProject As IProjectModel = ApplicationHost.Current.Plugins.Execute("mkitem", New Object() {folder, "arr"})
-                Dim boolCreateModel As Boolean = ApplicationHost.Current.Plugins.Execute("activate", New Object() {iUserProject})
-                If boolCreateModel = True Then
-                    DrawLayer = DrawingLayer.GetDrawingLayer(userCadView)
-                    ActivDocument = DrawLayer.Drawing
-                    userProject = iUserProject.Project
-                    Dim attrs As Attributes = New Attributes()
-                    userProject.SetCommonModelAttributes(iUserProject.Uri, "SVPlan", attrs)
-                End If
-            Catch ex As System.Exception
-            End Try
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            Dim arrayObjectLocalID As String() = {}
-            Dim countArrayObjectLocalID As Integer = 0
-            userCadView.SelectionSet.SelectAll()
-            For Each acCadastralObject As Object In userCadView.SelectionSet
-                If TypeOf acCadastralObject Is DwgEntity Then
-                    Dim drawigObject As Dwg.Drawing = acCadastralObject.Drawing
-                    Dim fullName As String = drawigObject.Filename
-                    Dim boolFindFolder As Boolean = FuncFiles.FuncIsFolderInPathSafe(fullName, "CadastralPlan")
-                    If boolFindFolder = True Then
-                        'ищем пересечения
-                        If TypeOf acCadastralObject Is DwgPolyline Then
-                            Dim plineEnt As DwgPolyline = acCadastralObject
-                            Dim boolIntersect As Boolean = plineZone.IntersectWith(plineEnt.Bounds, 1)
-                            If boolIntersect = True Then
-                                Dim localID As String = FuncXRecords.FuncReadValueXData(plineEnt, "LOCALID")
-                                If localID.Trim.Length > 1 Then
-                                    Dim boolFindObject As Boolean = False
-                                    For i As Integer = 0 To arrayObjectLocalID.Length - 1
-                                        If localID Like arrayObjectLocalID(i) Then
-                                            boolFindObject = True
-                                            Exit For
-                                        End If
-                                    Next i
-                                    If boolFindObject = False Then
-                                        ReDim Preserve arrayObjectLocalID(countArrayObjectLocalID)
-                                        arrayObjectLocalID(countArrayObjectLocalID) = localID
-                                        countArrayObjectLocalID += 1
+                            If dictCadastralNumber.Count > 0 Then
+                                If dictCadastralNumber.Contains(cadNumber) = True Then
+                                    Continue For
+                                End If
+                            End If
+                            '===========================================================================================================
+                            'читаем координаты объекта
 
-                                        Dim numberParcel As String = FuncXRecords.FuncReadValueXData(plineEnt, "Short_cad_number", "PROJECT_BRIDGE")
-                                        If numberParcel.Trim.Length = 0 Then
-                                            numberParcel = FuncXRecords.FuncReadValueXData(plineEnt, "Reg_numb_border", "PROJECT_BRIDGE")
-                                        End If
-                                        If numberParcel.Trim.Length > 0 Then
-                                            Dim arrayVertexDbl As Double(,) = Nothing
-                                            Dim boolVertDbl As Boolean = FuncConvertData.FuncConvertVertexPolylineToArrayDbl(plineEnt, arrayVertexDbl)
-                                            If IsArray(arrayVertexDbl) = True Then
-                                                Dim CrossPointFirstPline As Topomatic.Cad.Foundation.Vector3D = MathFunction.FuncFindCrossCenterPointPolyline(arrayVertexDbl)
-                                                Dim acMText As DwgMText = RoburFunc.FuncDrawMText(ActivDocument, numberParcel, CrossPointFirstPline)
-                                                If IsNothing(acMText) = False Then
-                                                    'acMText.Height = HtextZone
-                                                    'acMText.Layer = zonesLayer
-                                                    acMText.Annotative = True
+                            '==========================================================================================================
+                            'ФОРМИРУЕМ СЕМАНТИКУ
+                            dataCadastralObject.NameTypeObject = CadastralTools.StructureElement.GetEnumByValue(GetType(nameObject), idName)
+                            dataCadastralObject.Description = CadastralTools.StructureElement.GetEnumDescriptionByValue(GetType(nameObject), idName)
+                            dataCadastralObject.NameClassObject = CadastralTools.StructureElement.classObject.LAND_CADASTRAL
+                            dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.polygon
+                            dataCadastralObject.KeyParameter = keyParam
+                            dataCadastralObject.IdElement = Guid.NewGuid.ToString
+                            dataCadastralObject.TablePS = PSTable
+                            Select Case PSTable
+                                Case "LAND_CADASTRAL_DIVISION"
+                                    tableZn = "ЕГРН-Кадастровое деление"
+                                Case "LAND_CADASTRAL_PARCEL"
+                                    tableZn = "ЕГРН-Кадастровые участки"
+                                Case "LAND_CADASTRAL_PART"
+                                    tableZn = "ЕГРН-Кадастровые участки"
+                                Case "LAND_CADASTRAL_BUILDING"
+                                    tableZn = "ЕГРН-Здания (строения)"
+                                Case "LAND_CADASTRAL_CONSTRUCTION"
+                                    dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.line
+                                    tableZn = "ЕГРН-Сооружения"
+                                Case "LAND_CADASTRAL_UNFINISHED_CONSTRUCTION"
+                                    dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.line
+                                    tableZn = "ЕГРН-Объекты незавершенного строительства"
+                                Case "LAND_CADASTRAL_ZONE"
+                                    tableZn = "ЕГРН-Территориальные зоны"
+                                Case "LAND_CADASTRAL_BOUNDARY"
+                                    tableZn = "ЕГРН-Границы территорий"
+                                    If dataCadastralObject.NameTypeObject = nameObject.WaterBoundary Then
+                                        dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.line
+                                    End If
+                                Case "LAND_CADASTRAL_REDLINE"
+                                    tableZn = "ЕГРН-Границы территорий"
+                                    dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.line
+                                Case "LAND_CADASTRAL_COASTLINE"
+                                    tableZn = "ЕГРН-Границы территорий"
+                                    dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.line
+                            End Select
+                            '=========================================================================================================================
+                            'назначаем стиль
+                            Dim newStyle As StyleCadastralObject = New StyleCadastralObject(ActivDocument)
+                            If dictonaryStyle.ContainsKey(dataCadastralObject.Description) = False Then
+                                Dim arrayProperties As String(,) = {}
+                                newStyle.setObjectStyle(templateXML, categoryZn, tableZn, StyleCadastralObject.typeEntity.Полилиния, dataCadastralObject.Description)
+                                dictonaryStyle.Add(dataCadastralObject.Description, newStyle)
+                            Else
+                                newStyle = dictonaryStyle.Item(dataCadastralObject.Description)
+                            End If
+                            '=============================================================================================================================
+                            'рисуем контур
+                            If listPolygonCoordinates.Count > 0 Then
+                                Dim listPolygon As Dictionary(Of Object, NetTopologySuite.Geometries.Polygon) = New Dictionary(Of Object, NetTopologySuite.Geometries.Polygon)
+                                For i As Integer = 0 To listPolygonCoordinates.Count - 1
+                                    Dim arrayCoord As String(,) = listPolygonCoordinates.ElementAt(i)
+                                    If arrayCoord.Length > 2 Then
+                                        Dim acPolyline As DwgPolyline = drawObject.createPolylineToArrayPoint(arrayCoord)
+                                        If IsNothing(acPolyline) = False Then
+                                            If dataCadastralObject.TypeGeometry = typeGeometryObject.polygon Then
+                                                acPolyline.Closed = True
+                                                Dim sourcePolygon As NetTopologySuite.Geometries.Polygon = roburNetTopoSuit.CreatePolygonByPolyline(acPolyline)
+                                                listPolygon.Add(acPolyline, sourcePolygon)
+                                                If listPolygon.Count > 1 Then
+                                                    Dim boolFindOstrov As Boolean = False
+                                                    For j As Integer = 0 To listPolygon.Count - 2
+                                                        Dim destPolygon As NetTopologySuite.Geometries.Polygon = listPolygon.ElementAt(j).Value
+                                                        If destPolygon.Area > sourcePolygon.Area Then
+                                                            If cadastralToolsNetTopoSuit.IsPolygonInside(destPolygon, sourcePolygon) = True Then
+                                                                boolFindOstrov = True
+                                                                Exit For
+                                                            ElseIf cadastralToolsNetTopoSuit.IsPolygonInside(sourcePolygon, destPolygon) = True Then
+                                                                boolFindOstrov = True
+                                                                Exit For
+                                                            End If
+                                                        End If
+                                                    Next j
+                                                    If boolFindOstrov = True Then
+                                                        Dim objOstrov As CadastralTools.StructureElement = New CadastralTools.StructureElement
+                                                        objOstrov.Label = dataCadastralObject.Label
+                                                        objOstrov.NameClassObject = CadastralTools.StructureElement.classObject.LAND_CADASTRAL
+                                                        dataCadastralObject.TypeGeometry = CadastralTools.StructureElement.typeGeometryObject.polygon
+                                                        objOstrov.NameTypeObject = dataCadastralObject.NameTypeObject
+                                                        objOstrov.Description = "Внутренний островок"
+                                                        objOstrov.IdStructure = dataCadastralObject.IdElement
+                                                        objOstrov.IdElement = Guid.NewGuid.ToString
+                                                        objOstrov.TablePS = "CADASTRAL_OSTROV"
+                                                        Dim dictOstrov As Dictionary(Of String, String) = New Dictionary(Of String, String)
+                                                        dictOstrov.Add("ConditionalNumber", countOstrov)
+                                                        dictOstrov.Add("ParentNumber", cadNumber)
+                                                        Dim keyParamOstrov As String = CadastralTools.JsonValidator.convertDictionaryToJson(dictOstrov)
+                                                        objOstrov.KeyParameter = keyParamOstrov
+                                                        Dim boolWriteDataOstriv As Boolean = FuncXRecords.setXRecords(acPolyline, CadastralTools.StructureElement.tableXRecords.PROJECT_STRUCTURES, objOstrov)
+                                                        ActivDocument.ActiveSpace.Entities.Add(acPolyline)
+                                                        newStyle.setObjectStyle(acPolyline)
+                                                        countOstrov += 1
+                                                        Continue For
+                                                    End If
                                                 End If
                                             End If
-
-
-
-                                            'boundPolyline3d = New Polyline3D()
-                                            'l1stBoundVertex = New List(Of Vector2D)
-                                            'plineEnt.GetPolyline(boundPolyline3d)
-                                            'boundPolyline3d.ConvertToPosArray(l1stBoundVertex, ValueConverter.Eps)
-
-                                            'Dim arrayPositionsPline As Double() = {}
-                                            'Dim countArrayPositionsPLine As Integer = 0
-                                            'If l1stBoundVertex.Count > 2 Then
-                                            '    For i As Integer = 0 To l1stBoundVertex.Count - 1
-                                            '        ReDim Preserve arrayPositionsPline(countArrayPositionsPLine + 1)
-                                            '        arrayPositionsPline(countArrayPositionsPLine) = l1stBoundVertex.Item(i).X
-                                            '        arrayPositionsPline(countArrayPositionsPLine + 1) = l1stBoundVertex.Item(i).Y
-                                            '        countArrayPositionsPLine += 2
-                                            '    Next i
-                                            'End If
-                                            'If arrayPositionsPline.Length > 6 Then
-                                            '    Dim intersections = MathFunction.FindPolygonIntersections(arrayPositionsBound, arrayPositionsPline)
-
-                                            'If intersections IsNot Nothing Then
-                                            '    MsgBox("Найдено " & intersections.Length & " областей пересечения")
-                                            '    For Each polygon In intersections
-
-                                            '        Console.WriteLine($"Площадь области пересечения: {polygon.Area}")
-                                            '    Next
-                                            'Else
-                                            '    Console.WriteLine("Пересечений не найдено")
-                                            'End If
+                                            ActivDocument.ActiveSpace.Entities.Add(acPolyline)
+                                            newStyle.setObjectStyle(acPolyline)
+                                            Dim boolWriteData As Boolean = FuncXRecords.setXRecords(acPolyline, CadastralTools.StructureElement.tableXRecords.PROJECT_STRUCTURES, dataCadastralObject)
                                         End If
+                                    Else
+                                        Dim acCircle As DwgCircle = New DwgCircle
+                                        acCircle.Center = New Vector3D(arrayCoord(0, 0), arrayCoord(0, 1), 0)
+                                        acCircle.Radius = 0.5
+                                        newStyle.setObjectStyle(acCircle)
+                                        dataCadastralObject.TypeGeometry = typeGeometryObject.point
+                                        ActivDocument.ActiveSpace.Entities.Add(acCircle)
+                                        Dim boolWriteData As Boolean = FuncXRecords.setXRecords(acCircle, CadastralTools.StructureElement.tableXRecords.PROJECT_STRUCTURES, dataCadastralObject)
+                                        Continue For
                                     End If
-                                End If
-                                Dim plineObject = plineEnt.Clone()
-                                ActivDocument.ActiveSpace.Add(plineObject)
+                                Next i
                             End If
                         End If
+                    Catch ex As System.Exception
+                    End Try
+                Next
+
+                If FormCadastralImport.boolImportXML = True Then
+                    If nameKvartal.Trim.Length > 0 Then
+                        Dim boolKVName As Boolean = CadastralTools.SupportFiles.RenameDirectory(tempPath, nameKvartal)
                     End If
                 End If
-            Next
-
-
-            'userProject = ApplicationHost.Current.ActiveProject
-            ''// Получение всех моделей проекта
-            'Dim childs As IProjectModel() = userProject.Model.GetChilds()
-            'For Each child As IProjectModel In childs
-            '    Dim modelUri As URI = child.Uri
-            '    If modelUri.Extension Like ".arrx" Then
-            '        Dim boolFindFolder As Boolean = FuncFiles.FuncIsFolderInPathSafe(fullName, "CadastralPlan")
-            '        If boolFindFolder = True Then
-            '            DrawLayer = DrawingLayer.GetDrawingLayer(userCadView)
-            '            ActivDocument = DrawLayer.Drawing
-            '            For Each acCadastralObject As DwgEntity In ActivDocument.ActiveSpace.Entities
-            '                Dim drawigObject As Dwg.Drawing = acCadastralObject.Drawing
-            '                Dim fullName As String = drawigObject.Filename
-            '                Dim boolFindFolder As Boolean = FuncFiles.FuncIsFolderInPathSafe(fullName, "CadastralPlan")
-            '                If boolFindFolder = True Then
-            '                    'ищем пересечения
-            '                    If TypeOf acCadastralObject Is DwgPolyline Then
-            '                        Dim plineEnt As DwgPolyline = acCadastralObject
-            '                        Dim boolIntersect As Boolean = plineZone.IntersectWith(plineEnt.Bounds, 1)
-            '                        Dim plineObject = plineEnt.Clone()
-            '                        ActivDocument.ActiveSpace.Add(plineObject)
-            '                    End If
-            '                End If
-            '            Next
-
-            '        End If
-            '    End If
-            'Next
-
-
-            '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-            'перебираем элементы
-
-
-
-
+            Finally
+                ActivDocument.EndUpdate()
+            End Try
         End Sub
+
         '==============================================================================================================================
         'Импорт из текстового файла
         <cmd("ImportCoordinates")>
@@ -3006,7 +996,7 @@ Line1:
             Dim parcelsGWidth As Double = 0
             Dim parcelsPSTable As String = ""
             If IsArray(arrayPropertiesParcels) = True Then
-                Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, templateXML, arrayPropertiesParcels, parcelsLayer, parcelsTypeLine, parcelsColor, parcelsScaleTypeLine, parcelsWightLine, parcelsPSTable, parcelsGWidth)
+                'Dim boolCreateStyle As Boolean = StyleCadastralObject.createStyleLinearObjec(ActivDocument, templateXML, arrayPropertiesParcels, parcelsLayer, parcelsTypeLine, parcelsColor, parcelsScaleTypeLine, parcelsWightLine, parcelsPSTable, parcelsGWidth)
             End If
             'точки
             Dim categoryPoint As String = formImport.ComboBox4.Text
@@ -3028,7 +1018,7 @@ Line1:
             Dim pointName As String = "PROJECT_POINT"
             Dim pointNote As String = ""
             If IsArray(arrayPropertiesPoints) = True Then
-                FuncDecorPlane.FuncCreateStylePointObject(ActivDocument, templateXML, arrayPropertiesPoints, pointName, pointLayer, pointTypeLine, pointColor, pointScaleLineType, pointWightLine, pointScale, pointAngle, pointAttributeHeight, pointPSTable, pointNote)
+                'FuncDecorPlane.FuncCreateStylePointObject(ActivDocument, templateXML, arrayPropertiesPoints, pointName, pointLayer, pointTypeLine, pointColor, pointScaleLineType, pointWightLine, pointScale, pointAngle, pointAttributeHeight, pointPSTable, pointNote)
             End If
             '========================================================================
             'загружаем блок
@@ -3155,132 +1145,134 @@ Line1:
 
             '1.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
             'сброс выделения
+            Dim filej As String = "k:\Civil3DToolsUtility"
             userCadView.SelectionSet.Clear()
-            Dim formCreateParcels As FormCreateParcels = New FormCreateParcels
-            formCreateParcels.userCadView = userCadView
+            Dim formCreateParcels As CadastralTools.FormCreateCadastralObject = New FormCreateCadastralObject(filej)
+
             formCreateParcels.ShowDialog()
-            If formCreateParcels.boolShow = False Then
-                Exit Sub
-            End If
-            '=========================================================================================================================
-            Dim activUserModel As String = formCreateParcels.ComboBox4.Text
-            Dim Project As ModelProject = ApplicationHost.Current.ActiveProject
-            '// Получение всех моделей проекта
-            Dim childs As IProjectModel() = Project.Model.GetChilds()
-            For Each child As IProjectModel In childs
-                Dim modelUri As URI = child.Uri
-                If modelUri.Extension Like ".arrx" Then
-                    Dim fileNameSfcx As String = Path.GetFileNameWithoutExtension(modelUri.LastPathComponent)
-                    If fileNameSfcx.Trim Like activUserModel.Trim Then
-                        ApplicationHost.Current.Plugins.Execute("activate", New Object() {child})
-                        Exit For
-                    End If
-                End If
-            Next
-            Dim DrawShowLayers As IEnumerable(Of DrawingLayer) = DrawingLayer.GetDrawingLayers(userCadView)
-            If IsNothing(activUserModel) = False Then
-                If activUserModel.Trim.Length > 0 Then
-                    For k1 As Integer = 0 To DrawShowLayers.Count - 1
-                        Dim TempDrawLayer As DrawingLayer = DrawShowLayers.ElementAt(k1)
-                        Dim nameUserFile As String = TempDrawLayer.Drawing.Filename
-                        nameUserFile = IO.Path.GetFileNameWithoutExtension(nameUserFile)
-                        If nameUserFile Like activUserModel Then
-                            DrawLayer = TempDrawLayer
-                            ActivDocument = DrawLayer.Drawing
-                            Exit For
-                        End If
-                    Next k1
-                End If
-            End If
-            If formCreateParcels.CheckBox1.Checked = True Then
-                globID = rng.Next
-            End If
-            If IsArray(formCreateParcels.arrayObjectProperties) = True Then
-                'участок
-                Dim parcelsLayer As DwgLayer = ActivDocument.ActiveLayer
-                Dim parcelsLineType As DwgLinetype = ActivDocument.ActiveLinetype
-                Dim parcelsColor As CadColor = New CadColor(7)
-                Dim parcelsScaleLineType As Double = 1
-                Dim parcelsWidthLine As Double = 20
-                Dim parcelsGWidthLine As Double = 0
-                Dim parcelsPSData As String = formCreateParcels.DataGridView1.Tag
-                Dim deskParcel As String = formCreateParcels.ComboBox2.Text
-                Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, formCreateParcels.templateXML, formCreateParcels.arrayObjectProperties, parcelsLayer, parcelsLineType, parcelsColor, parcelsScaleLineType, parcelsWidthLine, parcelsPSData, parcelsGWidthLine)
-                Dim arrayData As String(,) = Nothing
-                Dim countArrayData As Integer = 0
-                If formCreateParcels.DataGridView1.RowCount > 0 Then
-                    For i As Integer = 0 To formCreateParcels.DataGridView1.RowCount - 1
-                        Dim nameFields As String = formCreateParcels.DataGridView1.Rows(i).Cells(0).Value
-                        Dim strVal As String = formCreateParcels.DataGridView1.Rows(i).Cells(1).Value
-                        ReDim Preserve arrayData(1, countArrayData)
-                        arrayData(0, countArrayData) = nameFields
-                        arrayData(1, countArrayData) = strVal
-                        countArrayData += 1
-                    Next i
-                End If
-                '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-                'выбираем объекты
-                userCadView.SelectionSet.SelectObjectsAtScreen(Function(obj) TypeOf obj Is DwgPolyline, "Выборите полилинии для преобразования их в островки: ")
-                For Each acEnt As Object In userCadView.SelectionSet
-                    If TypeOf (acEnt) Is DwgPolyline Then
-                        Dim plineParcels As DwgPolyline = acEnt
-                        Dim fileObjectName As String = plineParcels.Drawing.Layers.Drawing.Filename
-                        Dim nameUserFile As String = IO.Path.GetFileNameWithoutExtension(fileObjectName)
-                        If Not (nameUserFile Like activUserModel) Then
-                            plineParcels = plineParcels.Clone()
-                            If IsNothing(ActivDocument) = False Then
-                                ActivDocument.ActiveSpace.Add(plineParcels)
-                            End If
-                        End If
-                        If plineParcels.Count > 2 Then
-                            Dim boolDblVert As Boolean = MathFunction.FuncDeleteDubleVertexPline(plineParcels, 0.01)
-                            If plineParcels.Closed = False Then
-                                If parcelsPSData Like "PROJECT_PARCEL" Or parcelsPSData Like "TEMPORARY_PARCEL" Or parcelsPSData Like "PROJECT_ZONA" Or parcelsPSData Like "PROJECT_BUILDING" Then
-                                    plineParcels.Closed = True
-                                End If
-                            End If
-                        End If
-                        plineParcels.Color = parcelsColor
-                        plineParcels.Layer = parcelsLayer
-                        plineParcels.Linetype = parcelsLineType
-                        plineParcels.Lineweight = parcelsWidthLine
-                        plineParcels.LinetypeScale = parcelsScaleLineType
-                        plineParcels.Width = parcelsGWidthLine
-                        Dim boolAreaLenght As Boolean = False
-                        If IsArray(arrayData) = True Then
-                            For i As Integer = 0 To arrayData.GetUpperBound(1)
-                                If arrayData(0, i) Like "Area" Or arrayData(0, i) Like "AREA" Or arrayData(0, i) Like "area" Then
-                                    Dim areaParcel As Double = Math.Abs(MathFunction.GetArea(plineParcels, 2))
-                                    arrayData(1, i) = Math.Round(areaParcel, 0)
-                                    boolAreaLenght = True
-                                ElseIf arrayData(0, i) Like "Lenght" Or arrayData(0, i) Like "LENGHT" Or arrayData(0, i) Like "lenght" Then
-                                    arrayData(1, i) = Math.Round(plineParcels.Length, 2)
-                                    boolAreaLenght = True
-                                ElseIf arrayData(0, i) Like "GLOBALID" Then
-                                    arrayData(1, i) = globID
-                                ElseIf arrayData(0, i) Like "LOCALID" Then
-                                    arrayData(1, i) = rng.Next
-                                End If
-                            Next i
-                            If boolAreaLenght = False Then
-                                For i As Integer = 0 To arrayData.GetUpperBound(1)
-                                    If arrayData(0, i) Like "KeyParameters" Then
-                                        If plineParcels.Closed = True Then
-                                            Dim areaParcel As Double = Math.Abs(MathFunction.GetArea(plineParcels, 2))
-                                            Dim lenghParcel As Double = Math.Round(plineParcels.Length, 2)
-                                            arrayData(1, i) = "Площадь: " & Math.Round(areaParcel, 0) & " кв.м. Периметр: " & lenghParcel & " м."
-                                        Else
-                                            Dim lenghParcel As Double = Math.Round(plineParcels.Length, 2)
-                                            arrayData(1, i) = "Периметр: " & lenghParcel & " м."
-                                        End If
-                                    End If
-                                Next i
-                            End If
-                            Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(plineParcels, parcelsPSData, arrayData, formCreateParcels.templateXML)
-                        End If
-                    End If
-                Next
-            End If
+            Exit Sub
+            'If formCreateParcels.boolShow = False Then
+
+            'End If
+            ''=========================================================================================================================
+            'Dim activUserModel As String = formCreateParcels.ComboBox4.Text
+            'Dim Project As ModelProject = ApplicationHost.Current.ActiveProject
+            ''// Получение всех моделей проекта
+            'Dim childs As IProjectModel() = Project.Model.GetChilds()
+            'For Each child As IProjectModel In childs
+            '    Dim modelUri As URI = child.Uri
+            '    If modelUri.Extension Like ".arrx" Then
+            '        Dim fileNameSfcx As String = Path.GetFileNameWithoutExtension(modelUri.LastPathComponent)
+            '        If fileNameSfcx.Trim Like activUserModel.Trim Then
+            '            ApplicationHost.Current.Plugins.Execute("activate", New Object() {child})
+            '            Exit For
+            '        End If
+            '    End If
+            'Next
+            'Dim DrawShowLayers As IEnumerable(Of DrawingLayer) = DrawingLayer.GetDrawingLayers(userCadView)
+            'If IsNothing(activUserModel) = False Then
+            '    If activUserModel.Trim.Length > 0 Then
+            '        For k1 As Integer = 0 To DrawShowLayers.Count - 1
+            '            Dim TempDrawLayer As DrawingLayer = DrawShowLayers.ElementAt(k1)
+            '            Dim nameUserFile As String = TempDrawLayer.Drawing.Filename
+            '            nameUserFile = IO.Path.GetFileNameWithoutExtension(nameUserFile)
+            '            If nameUserFile Like activUserModel Then
+            '                DrawLayer = TempDrawLayer
+            '                ActivDocument = DrawLayer.Drawing
+            '                Exit For
+            '            End If
+            '        Next k1
+            '    End If
+            'End If
+            'If formCreateParcels.CheckBox1.Checked = True Then
+            '    globID = rng.Next
+            'End If
+            'If IsArray(formCreateParcels.arrayObjectProperties) = True Then
+            '    'участок
+            '    Dim parcelsLayer As DwgLayer = ActivDocument.ActiveLayer
+            '    Dim parcelsLineType As DwgLinetype = ActivDocument.ActiveLinetype
+            '    Dim parcelsColor As CadColor = New CadColor(7)
+            '    Dim parcelsScaleLineType As Double = 1
+            '    Dim parcelsWidthLine As Double = 20
+            '    Dim parcelsGWidthLine As Double = 0
+            '    Dim parcelsPSData As String = formCreateParcels.DataGridView1.Tag
+            '    Dim deskParcel As String = formCreateParcels.ComboBox2.Text
+            '    'Dim boolCreateStyle As Boolean = FuncDecorPlane.FuncCreateStyleLinearObject(ActivDocument, formCreateParcels.templateXML, formCreateParcels.arrayObjectProperties, parcelsLayer, parcelsLineType, parcelsColor, parcelsScaleLineType, parcelsWidthLine, parcelsPSData, parcelsGWidthLine)
+            '    Dim arrayData As String(,) = Nothing
+            '    Dim countArrayData As Integer = 0
+            '    If formCreateParcels.DataGridView1.RowCount > 0 Then
+            '        For i As Integer = 0 To formCreateParcels.DataGridView1.RowCount - 1
+            '            Dim nameFields As String = formCreateParcels.DataGridView1.Rows(i).Cells(0).Value
+            '            Dim strVal As String = formCreateParcels.DataGridView1.Rows(i).Cells(1).Value
+            '            ReDim Preserve arrayData(1, countArrayData)
+            '            arrayData(0, countArrayData) = nameFields
+            '            arrayData(1, countArrayData) = strVal
+            '            countArrayData += 1
+            '        Next i
+            '    End If
+            '    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+            '    'выбираем объекты
+            '    userCadView.SelectionSet.SelectObjectsAtScreen(Function(obj) TypeOf obj Is DwgPolyline, "Выборите полилинии для преобразования их в островки: ")
+            '    For Each acEnt As Object In userCadView.SelectionSet
+            '        If TypeOf (acEnt) Is DwgPolyline Then
+            '            Dim plineParcels As DwgPolyline = acEnt
+            '            Dim fileObjectName As String = plineParcels.Drawing.Layers.Drawing.Filename
+            '            Dim nameUserFile As String = IO.Path.GetFileNameWithoutExtension(fileObjectName)
+            '            If Not (nameUserFile Like activUserModel) Then
+            '                plineParcels = plineParcels.Clone()
+            '                If IsNothing(ActivDocument) = False Then
+            '                    ActivDocument.ActiveSpace.Add(plineParcels)
+            '                End If
+            '            End If
+            '            If plineParcels.Count > 2 Then
+            '                Dim boolDblVert As Boolean = MathFunction.FuncDeleteDubleVertexPline(plineParcels, 0.01)
+            '                If plineParcels.Closed = False Then
+            '                    If parcelsPSData Like "PROJECT_PARCEL" Or parcelsPSData Like "TEMPORARY_PARCEL" Or parcelsPSData Like "PROJECT_ZONA" Or parcelsPSData Like "PROJECT_BUILDING" Then
+            '                        plineParcels.Closed = True
+            '                    End If
+            '                End If
+            '            End If
+            '            plineParcels.Color = parcelsColor
+            '            plineParcels.Layer = parcelsLayer
+            '            plineParcels.Linetype = parcelsLineType
+            '            plineParcels.Lineweight = parcelsWidthLine
+            '            plineParcels.LinetypeScale = parcelsScaleLineType
+            '            plineParcels.Width = parcelsGWidthLine
+            '            Dim boolAreaLenght As Boolean = False
+            '            If IsArray(arrayData) = True Then
+            '                For i As Integer = 0 To arrayData.GetUpperBound(1)
+            '                    If arrayData(0, i) Like "Area" Or arrayData(0, i) Like "AREA" Or arrayData(0, i) Like "area" Then
+            '                        Dim areaParcel As Double = Math.Abs(MathFunction.GetArea(plineParcels, 2))
+            '                        arrayData(1, i) = Math.Round(areaParcel, 0)
+            '                        boolAreaLenght = True
+            '                    ElseIf arrayData(0, i) Like "Lenght" Or arrayData(0, i) Like "LENGHT" Or arrayData(0, i) Like "lenght" Then
+            '                        arrayData(1, i) = Math.Round(plineParcels.Length, 2)
+            '                        boolAreaLenght = True
+            '                    ElseIf arrayData(0, i) Like "GLOBALID" Then
+            '                        arrayData(1, i) = globID
+            '                    ElseIf arrayData(0, i) Like "LOCALID" Then
+            '                        arrayData(1, i) = rng.Next
+            '                    End If
+            '                Next i
+            '                If boolAreaLenght = False Then
+            '                    For i As Integer = 0 To arrayData.GetUpperBound(1)
+            '                        If arrayData(0, i) Like "KeyParameters" Then
+            '                            If plineParcels.Closed = True Then
+            '                                Dim areaParcel As Double = Math.Abs(MathFunction.GetArea(plineParcels, 2))
+            '                                Dim lenghParcel As Double = Math.Round(plineParcels.Length, 2)
+            '                                arrayData(1, i) = "Площадь: " & Math.Round(areaParcel, 0) & " кв.м. Периметр: " & lenghParcel & " м."
+            '                            Else
+            '                                Dim lenghParcel As Double = Math.Round(plineParcels.Length, 2)
+            '                                arrayData(1, i) = "Периметр: " & lenghParcel & " м."
+            '                            End If
+            '                        End If
+            '                    Next i
+            '                End If
+            '                Dim boolWriteData As Boolean = FuncXRecords.FuncCreateXData(plineParcels, parcelsPSData, arrayData, formCreateParcels.templateXML)
+            '            End If
+            '        End If
+            '    Next
+            'End If
         End Sub
         '================================================================================================================================
         'полуавтоматическое создание участков
@@ -4041,7 +2033,7 @@ Line1:
             Dim nameLayerPoint As String = formInsertPoint.ComboBox3.Text
             Dim layerPoint As DwgLayer = RoburFunc.FuncFindLayerDwg(ActivDocument, nameLayerPoint)
             If IsNothing(layerPoint) = True Then
-                layerPoint = FuncDecorPlane.FuncCreateLayerByXML(ActivDocument, templateXML, nameLayerPoint)
+                'layerPoint = FuncDecorPlane.FuncCreateLayerByXML(ActivDocument, templateXML, nameLayerPoint)
             End If
             If IsNothing(layerPoint) = True Then
                 layerPoint = ActivDocument.ActiveLayer
@@ -4739,7 +2731,7 @@ Line1:
             Dim nameLayerPoint As String = formInsertPoint.ComboBox3.Text
             Dim layerPoint As DwgLayer = RoburFunc.FuncFindLayerDwg(ActivDocument, nameLayerPoint)
             If IsNothing(layerPoint) = True Then
-                layerPoint = FuncDecorPlane.FuncCreateLayerByXML(ActivDocument, templateXML, nameLayerPoint)
+                'layerPoint = FuncDecorPlane.FuncCreateLayerByXML(ActivDocument, templateXML, nameLayerPoint)
             End If
             If IsNothing(layerPoint) = True Then
                 layerPoint = ActivDocument.ActiveLayer
@@ -5671,7 +3663,7 @@ Line1:
                         arrayPropertyMLeader(1, i) = TextStyleUser
                     End If
                 Next i
-                FuncDecorPlane.FuncCreateStyleLeaderObject(ActivDocument, templateXML, arrayPropertyMLeader, nameCreateObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, TextStyleUser, hText, nameArrow, arrowSize, tablePs, note)
+                'FuncDecorPlane.FuncCreateStyleLeaderObject(ActivDocument, templateXML, arrayPropertyMLeader, nameCreateObject, objectLayer, objectUserTypeLine, objectColor, scaleUserTypeLine, widthUserTypeLine, TextStyleUser, hText, nameArrow, arrowSize, tablePs, note)
                 If note.Trim.Length > 0 Then
                     Dim ArrayNote As String() = note.Split(";")
                     If IsArray(ArrayNote) = True Then
@@ -5871,7 +3863,7 @@ Line1:
                                             End If
                                             Dim pointInsText As Vector2D = polyCounter.Bounds.Max
                                             Dim userMLeader As DwgLeader = Nothing
-                                            Dim styleTextUser As DwgStyle = FuncStyles.FuncReturnTextStyle(ActivDocument, TextStyleUser)
+                                            Dim styleTextUser As DwgStyle = StyleCadastralObject.FuncReturnTextStyle(ActivDocument, TextStyleUser)
                                             If IsNothing(styleTextUser) = True Then
                                                 styleTextUser = ActivDocument.Styles.Standard
                                             End If
@@ -7281,5 +5273,31 @@ Line1:
                 WApp = Nothing
             End If
         End Sub
+
+        'Сведения о наличии зон с особыми условиями использования территории
+        <cmd("UpdateProgram")>
+        Public Sub UpdateProgram()
+            'получаем активное окно
+            Dim userCadView As CadView = Me.CadView
+            If IsNothing(userCadView) Then Return
+            'получаем активный слой
+            Dim DrawLayer As DrawingLayer = DrawingLayer.GetDrawingLayer(userCadView)
+            If IsNothing(DrawLayer) = True Then Return
+            'получаем активный документ
+            Dim ActivDocument As Topomatic.Dwg.Drawing = DrawLayer.Drawing
+            If IsNothing(ActivDocument) = True Then Return
+
+            ' Dim tester As New GoogleDriveTester()
+            ' Dim folderUrl As String = "https://drive.google.com/drive/folders/1OWYT_urmd3QMrX0ZZPz5r3Uj3NxvXZrV?usp=drive_link"
+            'tester.TestFolderAccess(folderUrl)
+
+            Dim formDownload As CadastralTools.FormUpdateProgram = New FormUpdateProgram
+            formDownload.ShowDialog()
+
+
+
+        End Sub
+
+
     End Class
 End Namespace

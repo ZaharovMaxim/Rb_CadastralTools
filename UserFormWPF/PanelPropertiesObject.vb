@@ -1,44 +1,9 @@
 ﻿Imports System.ComponentModel
 Imports System.Windows.Forms
 Imports System.Drawing
-Imports System.Xml
-Imports Topomatic.Dwg.Entities
-Imports Topomatic.ApplicationPlatform.Plugins
 Imports Topomatic.Cad.View
-Imports Topomatic.Dwg.Layer
 Imports Topomatic.Dwg
-Imports Topomatic.Cad.Foundation
-Imports Topomatic.Sfc
-Imports Topomatic.FoundationClasses
-Imports Topomatic.Alg.Road.Urb.UserStrips
-Imports Topomatic.Alg.Road.Urb.Border
-Imports System.Windows.Shapes
-Imports Topomatic.Visualization
-Imports Topomatic.Visualization.Runtime
-Imports Topomatic.Cad.Foundation.Brep
-Imports Topomatic.Visualization.Geometry
-Imports Topomatic.Visualization.Runtime.Tools
-Imports Topomatic.Alg.Road.Crossing
-Imports Topomatic.Alg.Road
-Imports Topomatic.Alg.Runtime
-Imports Topomatic.Alg.Runtime.ServiceClasses
-Imports Topomatic.Alg
-Imports Topomatic.Alg.Road.Urb
-Imports Topomatic.Alg.Road.Urb.Descent
-Imports Topomatic.Alg.Plan
-Imports Topomatic.Alg.Stationing
-Imports Topomatic.Alg.Kilometres
-Imports Topomatic.Cad.View.Hints
-Imports System.Windows.Controls
-Imports System.IO
-Imports Topomatic.ApplicationPlatform.Core
-Imports System.Security.Policy
-Imports System.Windows.Media.Media3D
-Imports Topomatic.Alg.Crs
-Imports Topomatic.Planchet.Entities
-Imports Topomatic.Pipes.Layers.Caches.Plan.Segments.SegmentPlanCache.DrawingData
-Imports System.Reflection
-Imports System.Reflection.Emit
+Imports CadastralTools
 
 Public Class PanelPropertiesObject
     Public userCadView As CadView = Nothing
@@ -57,7 +22,7 @@ Public Class PanelPropertiesObject
         SetGlobalPropertiesMode()
         '1.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
         'находим каталог с файлами (c:\Users\mzaharov\AppData\Roaming\Civil3DToolsUtility\TOPOTemplates\)
-        templateXML = FuncFiles.getFileToDirectorySupport("Стандарт_ADSK.xml")
+        templateXML = FuncFiles.funcFindFileToDirectorySupport("Стандарт_ADSK.xml")
         If IsNothing(templateXML) = True Then
             MsgBox("Файл с шаблонами =Стандарт_ADSK.xml= не найден. Пожалуйста, добавьте его в пути доступа к вспомогательным файлам!!!")
             Exit Sub
@@ -93,47 +58,7 @@ Public Class PanelPropertiesObject
         Column2.DefaultCellStyle.FormatProvider = Globalization.CultureInfo.InvariantCulture
     End Sub
     'смена таблицы
-    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox_DataTable.SelectedIndexChanged
-        If boolselectCombo = False Then
-            'Dim nameSelectTable As String = ComboBox1.Text.Trim
-            'DataGridView1.Rows.Clear()
-            'If IsNothing(userCadView) = False Then
-            '    If userCadView.SelectionSet.Count = 1 Then
-            '        For Each acEnt As Object In userCadView.SelectionSet
-            '            If TypeOf acEnt Is DwgEntity Then
-            '                Dim acObj As DwgEntity = acEnt
-            '                Dim arrayData As String(,) = Nothing
-            '                Dim boolFindProperties As Boolean = FuncXRecords.FuncReadXData(acObj, nameSelectTable, arrayData)
-            '                If IsArray(arrayData) = True Then
-            '                    Dim countRow As Integer = 0
-            '                    For i As Integer = 0 To arrayData.GetUpperBound(1)
-            '                        Dim nameF As String = arrayData(0, i)
-            '                        Dim valF As String = arrayData(1, i)
-            '                        Dim desk As String = arrayData(2, i)
-            '                        If IsNothing(nameF) = False Then
-            '                            If nameF.Trim.Length > 0 Then
-            '                                If IsNothing(valF) = True Then valF = ""
-            '                                DataGridView1.Rows.Add()
-            '                                DataGridView1.Rows(countRow).Cells(0).Value = nameF
-            '                                DataGridView1.Rows(countRow).Cells(1).Value = valF
-            '                                DataGridView1.Rows(countRow).Cells(0).Tag = desk
-            '                                countRow += 1
-            '                            End If
-            '                        End If
-            '                    Next i
-            '                    DataGridView1.Rows(countRow).Cells(0).Value = "ObjectID"
-            '                    DataGridView1.Rows(countRow).Cells(1).Value = acObj.ObjectID
-            '                    DataGridView1.Rows(countRow).Cells(0).Tag = ""
-            '                    Exit For
-            '                End If
-            '            End If
-            '        Next
-            '    Else
-            '        DataGridView1.Rows.Clear()
-            '    End If
-            'End If
-        End If
-    End Sub
+
     '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     'перезаписать значение в ячейке
     Private Sub DataGridView1_CellBeginEdit(sender As Object, e As DataGridViewCellCancelEventArgs) Handles DataGrid_PropertiesEnt.CellBeginEdit
@@ -163,17 +88,17 @@ Public Class PanelPropertiesObject
                     dataStructureElement.Label = valF
                 ElseIf nameF Like "ClassBridgeObject" Then
                     Try
-                        dataStructureElement.ClassBridgeObject = CType([Enum].Parse(GetType(StructureElement.classBridge), valF), StructureElement.classBridge)
+                        dataStructureElement.NameClassObject = CType([Enum].Parse(GetType(StructureElement.classObject), valF), StructureElement.classObject)
                     Catch ex As System.ArgumentException
                     End Try
-                ElseIf nameF Like "ClassStructure" OrElse nameF Like "ClassObject" Then
+                ElseIf nameF Like "TypeGeometry" Then
                     Try
-                        dataStructureElement.ClassObject = CType([Enum].Parse(GetType(StructureElement.classStructure), valF), StructureElement.classStructure)
+                        dataStructureElement.TypeGeometry = CType([Enum].Parse(GetType(StructureElement.typeGeometryObject), valF), StructureElement.typeGeometryObject)
                     Catch ex As System.ArgumentException
                     End Try
-                ElseIf nameF Like "Name" Or nameF Like "NAME" Then
+                ElseIf nameF Like "NameTypeObject" Then
                     Try
-                        dataStructureElement.Name = CType([Enum].Parse(GetType(StructureElement.typeObject), valF), StructureElement.typeObject)
+                        dataStructureElement.NameTypeObject = CType([Enum].Parse(GetType(StructureElement.nameObject), valF), StructureElement.nameObject)
                     Catch ex As System.ArgumentException
                     End Try
                 ElseIf nameF Like "Description" Then
@@ -190,7 +115,7 @@ Public Class PanelPropertiesObject
             Else
                 'редактируются параметры json
                 Dim newKeyParameter As String = dataStructureElement.KeyParameter
-                Dim boolSetParam As Boolean = FuncGSON.setTypedValue(newKeyParameter, nameF, valF)
+                Dim boolSetParam As Boolean = CadastralTools.JsonValidator.SetJsonFieldValue(newKeyParameter, nameF, valF)
                 If boolSetParam = True Then
                     dataStructureElement.KeyParameter = newKeyParameter
                 Else
@@ -232,14 +157,14 @@ Public Class PanelPropertiesObject
                                     DataGrid_PropertiesEnt.Rows(0).Cells(0).Value = "LABEL"
                                     DataGrid_PropertiesEnt.Rows(0).Cells(1).Value = selectedDataStructureElement.Label
 
-                                    DataGrid_PropertiesEnt.Rows(1).Cells(0).Value = "ClassBridgeObject"
-                                    DataGrid_PropertiesEnt.Rows(1).Cells(1).Value = selectedDataStructureElement.ClassBridgeObject
+                                    DataGrid_PropertiesEnt.Rows(1).Cells(0).Value = "NameClassObject"
+                                    DataGrid_PropertiesEnt.Rows(1).Cells(1).Value = selectedDataStructureElement.NameClassObject
 
-                                    DataGrid_PropertiesEnt.Rows(2).Cells(0).Value = "ClassObject"
-                                    DataGrid_PropertiesEnt.Rows(2).Cells(1).Value = selectedDataStructureElement.ClassObject
+                                    DataGrid_PropertiesEnt.Rows(2).Cells(0).Value = "TypeGeometry"
+                                    DataGrid_PropertiesEnt.Rows(2).Cells(1).Value = selectedDataStructureElement.TypeGeometry
 
-                                    DataGrid_PropertiesEnt.Rows(3).Cells(0).Value = "Name"
-                                    DataGrid_PropertiesEnt.Rows(3).Cells(1).Value = selectedDataStructureElement.Name
+                                    DataGrid_PropertiesEnt.Rows(3).Cells(0).Value = "NameTypeObject"
+                                    DataGrid_PropertiesEnt.Rows(3).Cells(1).Value = selectedDataStructureElement.NameTypeObject
 
                                     DataGrid_PropertiesEnt.Rows(4).Cells(0).Value = "Description"
                                     DataGrid_PropertiesEnt.Rows(4).Cells(1).Value = selectedDataStructureElement.Description
@@ -285,10 +210,10 @@ Public Class PanelPropertiesObject
                                 Dim boolFindData As Boolean = FuncXRecords.getXRecords(selectedDwgObject, selectedDataStructureElement, StructureElement.tableXRecords.PROJECT_STRUCTURES)
                                 If boolFindData = True Then
                                     Dim keyParameter As String = selectedDataStructureElement.KeyParameter
-                                    If FuncGSON.IsValidJson(keyParameter) = True Then
+                                    If CadastralTools.JsonValidator.IsValidJson(keyParameter) = True Then
                                         Dim dictionaryDataGSon As Dictionary(Of String, Object) = Nothing
                                         Try
-                                            dictionaryDataGSon = FuncGSON.ParseJsonToDictionary(keyParameter)
+                                            dictionaryDataGSon = CadastralTools.JsonValidator.DeserializeJsonToDictionary(keyParameter)
                                         Catch ex As ArgumentException
                                         End Try
                                         If dictionaryDataGSon IsNot Nothing AndAlso dictionaryDataGSon.Count > 0 Then
@@ -343,6 +268,10 @@ Public Class PanelPropertiesObject
     End Sub
 
     Private Sub ToolStrip1_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ToolStrip1.ItemClicked
+
+    End Sub
+
+    Private Sub PanelPropertiesObject_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
     End Sub
 End Class
