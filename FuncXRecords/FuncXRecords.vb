@@ -36,14 +36,18 @@ Public Class FuncXRecords
                                     Dim valF As String = rez.Value
                                     If nameF Like "Label" Or nameF Like "LABEL" Then
                                         xData.Label = valF
-                                    ElseIf nameF Like "ClassBridgeObject" Then
+                                    ElseIf nameF Like "TypeGeometry" Then
                                         xData.TypeGeometry = CType([Enum].Parse(GetType(StructureElement.typeGeometryObject), valF), StructureElement.typeGeometryObject)
-                                    ElseIf nameF Like "ClassObject" Then
+                                    ElseIf nameF Like "NameClassObject" Then
                                         xData.NameClassObject = CType([Enum].Parse(GetType(StructureElement.classObject), valF), StructureElement.classObject)
-                                    ElseIf nameF Like "Name" Or nameF Like "NAME" Then
+                                    ElseIf nameF Like "NameTypeObject" Then
                                         xData.NameTypeObject = CType([Enum].Parse(GetType(StructureElement.nameObject), valF), StructureElement.nameObject)
+                                    ElseIf nameF Like "TableObject" Then
+                                        xData.TableObject = valF
                                     ElseIf nameF Like "Description" Then
                                         xData.Description = valF
+                                    ElseIf nameF Like "TablePS" Then
+                                        xData.TablePS = valF
                                     ElseIf nameF Like "KeyParameters" Then
                                         xData.KeyParameter = valF
                                     ElseIf nameF Like "IdStructure" Then
@@ -145,7 +149,9 @@ Public Class FuncXRecords
         SetStringIfNotEmpty(fieldDictionary, "NameClassObject", xData.NameClassObject)
         SetStringIfNotEmpty(fieldDictionary, "TypeGeometry", xData.TypeGeometry)
         SetStringIfNotEmpty(fieldDictionary, "NameTypeObject", xData.NameTypeObject)
+        SetStringIfNotEmpty(fieldDictionary, "TableObject", xData.TableObject)
         SetStringIfNotEmpty(fieldDictionary, "Description", xData.Description)
+        SetStringIfNotEmpty(fieldDictionary, "TablePS", xData.TablePS)
         SetStringIfNotEmpty(fieldDictionary, "KeyParameters", xData.KeyParameter)
         SetStringIfNotEmpty(fieldDictionary, "IdStructure", xData.IdStructure)
         SetStringIfNotEmpty(fieldDictionary, "IdElement", xData.IdElement)

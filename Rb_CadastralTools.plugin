@@ -9,28 +9,28 @@
       "cmd": "EditXMLSymbols",
       "title": "Редактор шаблона"
     },
-    "id_NumberPolygon": {
-      "cmd": "NumberPolygon",
+    "id_AutoNumberCadastralObject": {
+      "cmd": "AutoNumberCadastralObject",
       "title": "Нумеровать полигон"
     },
     "id_CreateCadastralObject": {
       "cmd": "CreateCadastralObject",
       "title": "Создать объект"
     },
-    "id_CreateOstrovObject": {
-      "cmd": "CreateOstrovObject",
+    "id_AddCadastralObjectRing": {
+      "cmd": "AddCadastralObjectRing",
       "title": "Добавить островок"
     },
-    "id_CreateCounterObject": {
-      "cmd": "CreateCounterObject",
+    "id_AddCadastralObjectCounter": {
+      "cmd": "AddCadastralObjectCounter",
       "title": "Добавить контур"
     },
     "id_ReportCoordinatesPoints": {
       "cmd": "ReportCoordinatesPoints",
       "title": "Каталог координат"
     },
-    "id_ReplaseParcels": {
-      "cmd": "ReplaseParcels",
+    "id_ReplaceCadastralObject": {
+      "cmd": "ReplaceCadastralObject",
       "title": "Замена контура"
     },
     "id_ReNumberPolygon": {
@@ -113,11 +113,11 @@
         "id_FiltreKPT",
         "-",
         "id_CreateCadastralObject",
-        "id_CreateCounterObject",
-        "id_CreateOstrovObject",
-        "id_ReplaseParcels",
+        "id_AddCadastralObjectCounter",
+        "id_AddCadastralObjectRing",
+        "id_ReplaceCadastralObject",
         "-",
-        "id_NumberPolygon",
+        "id_AutoNumberCadastralObject",
         "id_ReNumberPolygon",
         "id_FindCadastralPoints",
         "id_DeleteCadastralPoints",
@@ -139,7 +139,7 @@
   "panels": {
     "PanelSymbolTOPO_uid": {
       "title": "Оформление плана",
-      "cmd": "CreateSymbolTOPO",
+      "cmd": "ProjectCadastralSumbols",
       "icon": "ic_file",
       "refresh": "RefreshSymbolTOPO"
     },

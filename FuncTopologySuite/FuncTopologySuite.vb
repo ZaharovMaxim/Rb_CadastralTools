@@ -1,10 +1,17 @@
 ﻿Imports GeoAPI.Geometries
+Imports Microsoft.Office.Interop.Excel
+Imports Microsoft.Office.Interop.Word
 Imports NetTopologySuite.Geometries
 Imports NetTopologySuite.Operation.Distance
 Imports NetTopologySuite.Operation.Union
 Imports NetTopologySuite.Simplify
+Imports Topomatic.Dwg
 Imports Topomatic.Dwg.Entities
+Imports Topomatic.FoundationClasses
+Imports Topomatic.FoundationClasses.Undo
+Imports Topomatic.Smt.SemanticDataSet
 Imports Coordinate = NetTopologySuite.Geometries.Coordinate
+Imports Point = NetTopologySuite.Geometries.Point
 
 Public Class FuncTopologySuite
     Private ReadOnly _geometryFactory As GeometryFactory
@@ -77,6 +84,57 @@ Public Class FuncTopologySuite
         Dim coordinates = points.Select(Function(p) New Coordinate(p.x, p.y)).ToArray()
         Return _geometryFactory.CreateLineString(coordinates)
     End Function
+
+
+
+
+    '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    'работа с точками
+    Public Function getPointByListBlockReference(ByRef activeDocument As Topomatic.Dwg.Drawing, ByVal blockName As String, ByVal tagAttribute As String) As Dictionary(Of String, NetTopologySuite.Geometries.Point)
+        Dim result As New Dictionary(Of String, NetTopologySuite.Geometries.Point)
+        If IsNothing(blockName) = True Then Return result
+        If IsNothing(tagAttribute) = True Then Return result
+        Dim dwgEnts As DwgEntities = activeDocument.ActiveSpace.Entities
+        If dwgEnts.Count > 0 Then
+            For Each dwgEnt As DwgEntity In dwgEnts
+                If TypeOf dwgEnt Is DwgInsert Then
+                    Dim blk As DwgInsert = dwgEnt
+                    Dim layerBlk As DwgLayer = blk.Layer
+                    If layerBlk.Visible = True Then
+                        If blk.EntityName Like blockName Then
+                            'читаем атрибут
+                            Dim strAttr As String = AttributeCadastralBlock.getTextStringAttrabuteBlock(blk, tagAttribute)
+                            Dim numberPoint As Integer = CadastralTools.DataFormatting.ExtractIntNumberRegex(strAttr)
+                            Dim userPoint As NetTopologySuite.Geometries.Point = New NetTopologySuite.Geometries.Point(blk.Position.X, blk.Position.Y, blk.Position.Z)
+                            userPoint.UserData = Val(numberPoint)
+                            result.Add(blk.ObjectID, userPoint)
+                        End If
+                    End If
+                End If
+            Next
+        End If
+        Return result
+    End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     '=============================================================================================================================
     'работа с полигононами
     '=============================================================================================================================
